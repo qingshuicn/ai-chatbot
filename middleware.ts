@@ -9,7 +9,7 @@ export const config = {
   matcher: [
     '/', 
     '/:id', 
-    '/api/((?!test-bailian).*)',
+    '/api/((?!test-bailian|test-deepseek|test-deepseek-chat).*)',
     '/login', 
     '/register'
   ],

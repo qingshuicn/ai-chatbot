@@ -55,6 +55,7 @@ export default async function RootLayout({
             __html: THEME_COLOR_SCRIPT,
           }}
         />
+        <link rel="stylesheet" href="/styles/thinking-block.css" />
       </head>
       <body className="antialiased">
         <ThemeProvider
@@ -66,6 +67,7 @@ export default async function RootLayout({
           <Toaster position="top-center" />
           {children}
         </ThemeProvider>
+        <script src="/js/thinking-block.js" defer></script>
       </body>
     </html>
   );

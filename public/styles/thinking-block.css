@@ -1,0 +1,109 @@
+/* 思考块样式 */
+.thinking-block {
+  background-color: rgba(0, 0, 0, 0.03);
+  border-radius: 12px;
+  margin: 16px 0;
+  overflow: hidden;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+}
+
+.dark .thinking-block {
+  background-color: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.thinking-block:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.dark .thinking-block:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.thinking-header {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  cursor: pointer;
+  font-weight: 500;
+  color: var(--primary-color, #0070f3);
+  border-bottom: 1px solid transparent;
+  transition: background-color 0.2s ease;
+}
+
+.thinking-header:hover {
+  background-color: rgba(0, 0, 0, 0.02);
+}
+
+.dark .thinking-header:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.thinking-block:not(.collapsed) .thinking-header {
+  border-bottom-color: rgba(0, 0, 0, 0.1);
+}
+
+.dark .thinking-block:not(.collapsed) .thinking-header {
+  border-bottom-color: rgba(255, 255, 255, 0.1);
+}
+
+.dark .thinking-header {
+  color: var(--primary-color-dark, #3b82f6);
+}
+
+.thinking-icon {
+  margin-right: 8px;
+  font-size: 18px;
+}
+
+.thinking-title {
+  flex-grow: 1;
+  font-size: 14px;
+}
+
+.thinking-time-label {
+  margin-left: 4px;
+  opacity: 0.7;
+}
+
+.thinking-time {
+  font-weight: 600;
+  margin: 0 4px;
+  min-width: 16px;
+  display: inline-block;
+  text-align: center;
+}
+
+.thinking-expand-icon {
+  transition: transform 0.3s ease;
+  margin-left: 8px;
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+.thinking-block.collapsed .thinking-expand-icon {
+  transform: rotate(-90deg);
+}
+
+.thinking-content {
+  padding: 16px;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--text-color, #333);
+  overflow: hidden;
+  transition: max-height 0.3s ease, opacity 0.3s ease;
+  opacity: 1;
+}
+
+.dark .thinking-content {
+  color: var(--text-color-dark, #e0e0e0);
+}
+
+.thinking-block.collapsed .thinking-content {
+  display: none;
+  opacity: 0;
+}

@@ -72,6 +72,14 @@ const shouldRenderAsInline = (value: string): boolean => {
   );
 };
 
+// 为ReactMarkdown组件定义自定义组件的类型
+interface CodeProps {
+  node?: any;
+  inline?: boolean;
+  className?: string;
+  children?: React.ReactNode;
+}
+
 // 主要的Markdown组件
 const NonMemoizedMarkdown = ({ children }: { children: string }) => {
   // 预处理Markdown内容，为代码块处理做准备
@@ -102,7 +110,9 @@ const NonMemoizedMarkdown = ({ children }: { children: string }) => {
         ),
         
         // 代码（内联和代码块）
-        code: ({ node, inline, className, children }) => {
+        code: ({ node, inline, className, children, ...props }: CodeProps) => {
+          if (!children) return null;
+          
           // 处理内联代码
           if (inline) {
             return <InlineCode>{children}</InlineCode>;
