@@ -16,24 +16,24 @@ interface SuggestedActionsProps {
 function PureSuggestedActions({ chatId, append }: SuggestedActionsProps) {
   const suggestedActions = [
     {
-      title: 'What are the advantages',
-      label: 'of using Next.js?',
-      action: 'What are the advantages of using Next.js?',
+      title: '备课助手',
+      label: '帮我设计一节关于光合作用的课程',
+      action: '帮我设计一节关于光合作用的课程，包括教学目标、重点难点和教学流程',
     },
     {
-      title: 'Write code to',
-      label: `demonstrate djikstra's algorithm`,
-      action: `Write code to demonstrate djikstra's algorithm`,
+      title: '作业批改',
+      label: '分析这篇学生作文的优缺点',
+      action: '请帮我分析这篇学生作文的优缺点，并给出修改建议',
     },
     {
-      title: 'Help me write an essay',
-      label: `about silicon valley`,
-      action: `Help me write an essay about silicon valley`,
+      title: '知识解答',
+      label: '解释牛顿第二定律及其应用',
+      action: '请详细解释牛顿第二定律的含义及其在日常生活中的应用例子',
     },
     {
-      title: 'What is the weather',
-      label: 'in San Francisco?',
-      action: 'What is the weather in San Francisco?',
+      title: '教学素材',
+      label: '生成有关环保的课堂讨论话题',
+      action: '请为高中生生成5个有关环境保护的课堂讨论话题，要有深度且能引发思考',
     },
   ];
 
