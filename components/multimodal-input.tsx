@@ -236,7 +236,7 @@ function PureMultimodalInput({
         value={input}
         onChange={handleInput}
         className={cx(
-          'min-h-[24px] max-h-[calc(75dvh)] overflow-hidden resize-none rounded-2xl !text-base bg-muted pb-10 dark:border-zinc-700',
+          'min-h-[24px] max-h-[calc(75dvh)] overflow-hidden resize-none rounded-2xl !text-base bg-white dark:bg-zinc-800/80 border border-blue-100 dark:border-zinc-700 shadow-sm focus:border-blue-300 dark:focus:border-blue-700 focus:ring-1 focus:ring-blue-300 dark:focus:ring-blue-700 pb-10',
           className,
         )}
         rows={2}
@@ -293,7 +293,7 @@ function PureAttachmentsButton({
 }) {
   return (
     <Button
-      className="rounded-md rounded-bl-lg p-[7px] h-fit dark:border-zinc-700 hover:dark:bg-zinc-900 hover:bg-zinc-200"
+      className="rounded-full p-1.5 h-fit bg-gray-100 hover:bg-gray-200 dark:bg-zinc-700 dark:hover:bg-zinc-600 border border-gray-200 dark:border-zinc-600 text-gray-600 dark:text-gray-300"
       onClick={(event) => {
         event.preventDefault();
         fileInputRef.current?.click();
@@ -317,7 +317,7 @@ function PureStopButton({
 }) {
   return (
     <Button
-      className="rounded-full p-1.5 h-fit border dark:border-zinc-600"
+      className="rounded-full p-1.5 h-fit bg-red-500 hover:bg-red-600 text-white border-none shadow-sm"
       onClick={(event) => {
         event.preventDefault();
         stop();
@@ -342,7 +342,7 @@ function PureSendButton({
 }) {
   return (
     <Button
-      className="rounded-full p-1.5 h-fit border dark:border-zinc-600"
+      className="rounded-full p-1.5 h-fit bg-blue-500 hover:bg-blue-600 text-white border-none shadow-sm"
       onClick={(event) => {
         event.preventDefault();
         submitForm();
