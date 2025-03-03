@@ -159,12 +159,12 @@ const ReadingLevelSelector = ({
   ) => Promise<string | null | undefined>;
 }) => {
   const LEVELS = [
-    'Elementary',
-    'Middle School',
-    'Keep current level',
-    'High School',
-    'College',
-    'Graduate',
+    '小学水平',
+    '初中水平',
+    '保持当前水平',
+    '高中水平',
+    '大学水平',
+    '研究生水平',
   ];
 
   const y = useMotionValue(-40 * 2);
@@ -232,7 +232,7 @@ const ReadingLevelSelector = ({
                 if (currentLevel !== 2 && hasUserSelectedLevel) {
                   append({
                     role: 'user',
-                    content: `Please adjust the reading level to ${LEVELS[currentLevel]} level.`,
+                    content: `请调整阅读级别到${LEVELS[currentLevel]}级别.`,
                   });
 
                   setSelectedTool(null);

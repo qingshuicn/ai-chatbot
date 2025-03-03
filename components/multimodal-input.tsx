@@ -163,7 +163,7 @@ function PureMultimodalInput({
       const { error } = await response.json();
       toast.error(error);
     } catch (error) {
-      toast.error('Failed to upload file, please try again!');
+      toast.error('文件上传失败，请重试！');
     }
   };
 
@@ -232,7 +232,7 @@ function PureMultimodalInput({
 
       <Textarea
         ref={textareaRef}
-        placeholder="Send a message..."
+        placeholder="发送消息..."
         value={input}
         onChange={handleInput}
         className={cx(
@@ -246,7 +246,7 @@ function PureMultimodalInput({
             event.preventDefault();
 
             if (isLoading) {
-              toast.error('Please wait for the model to finish its response!');
+              toast.error('请等待模型完成响应！');
             } else {
               submitForm();
             }

@@ -39,13 +39,13 @@ export async function POST(request: Request) {
   const session = await auth();
 
   if (!session || !session.user || !session.user.id) {
-    return new Response('Unauthorized', { status: 401 });
+    return new Response('未授权', { status: 401 });
   }
 
   const userMessage = getMostRecentUserMessage(messages);
 
   if (!userMessage) {
-    return new Response('No user message found', { status: 400 });
+    return new Response('未找到用户消息', { status: 400 });
   }
 
   const chat = await getChatById({ id });
@@ -133,27 +133,27 @@ export async function DELETE(request: Request) {
   const id = searchParams.get('id');
 
   if (!id) {
-    return new Response('Not Found', { status: 404 });
+    return new Response('未找到', { status: 404 });
   }
 
   const session = await auth();
 
   if (!session || !session.user) {
-    return new Response('Unauthorized', { status: 401 });
+    return new Response('未授权', { status: 401 });
   }
 
   try {
     const chat = await getChatById({ id });
 
     if (chat.userId !== session.user.id) {
-      return new Response('Unauthorized', { status: 401 });
+      return new Response('未授权', { status: 401 });
     }
 
     await deleteChatById({ id });
 
-    return new Response('Chat deleted', { status: 200 });
+    return new Response('聊天已删除', { status: 200 });
   } catch (error) {
-    return new Response('An error occurred while processing your request', {
+    return new Response('处理请求时发生错误', {
       status: 500,
     });
   }

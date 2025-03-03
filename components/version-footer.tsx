@@ -43,9 +43,9 @@ export const VersionFooter = ({
       transition={{ type: 'spring', stiffness: 140, damping: 20 }}
     >
       <div>
-        <div>You are viewing a previous version</div>
+        <div>您正在查看之前的版本</div>
         <div className="text-muted-foreground text-sm">
-          Restore this version to make edits
+          恢复此版本以进行编辑
         </div>
       </div>
 
@@ -86,7 +86,7 @@ export const VersionFooter = ({
             );
           }}
         >
-          <div>Restore this version</div>
+          <div>恢复此版本</div>
           {isMutating && (
             <div className="animate-spin">
               <LoaderIcon />
@@ -99,7 +99,7 @@ export const VersionFooter = ({
             handleVersionChange('latest');
           }}
         >
-          Back to latest version
+          返回最新版本
         </Button>
       </div>
     </motion.div>
