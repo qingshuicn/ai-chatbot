@@ -13,9 +13,11 @@ import {
   GlobeIcon,
   LockIcon,
   MoreHorizontalIcon,
+  PlusIcon,
   ShareIcon,
   TrashIcon,
 } from '@/components/icons';
+import { Button } from '@/components/ui/button';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -153,6 +155,7 @@ export function SidebarHistory({ user }: { user: User | undefined }) {
   const { setOpenMobile } = useSidebar();
   const { id } = useParams();
   const pathname = usePathname();
+  const router = useRouter();
   const {
     data: history,
     isLoading,
@@ -167,7 +170,7 @@ export function SidebarHistory({ user }: { user: User | undefined }) {
 
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const router = useRouter();
+  
   const handleDelete = async () => {
     const deletePromise = fetch(`/api/chat?id=${deleteId}`, {
       method: 'DELETE',
@@ -195,54 +198,90 @@ export function SidebarHistory({ user }: { user: User | undefined }) {
 
   if (!user) {
     return (
-      <SidebarGroup>
-        <SidebarGroupContent>
-          <div className="px-2 text-zinc-500 w-full flex flex-row justify-center items-center text-sm gap-2">
-            登录以保存和重访之前的聊天！
-          </div>
-        </SidebarGroupContent>
-      </SidebarGroup>
+      <div className="flex flex-col h-full">
+        <SidebarGroup>
+          <SidebarGroupContent>
+            <div className="px-2 py-4 flex flex-col gap-4">
+              <Button
+                variant="default"
+                size="sm"
+                className="w-full flex items-center gap-2"
+                onClick={() => {
+                  router.push('/');
+                  router.refresh();
+                  setOpenMobile(false);
+                }}
+              >
+                <PlusIcon />
+                <span>新建聊天</span>
+              </Button>
+              <div className="text-zinc-500 w-full flex flex-row justify-center items-center text-sm gap-2">
+                登录以保存和重访之前的聊天！
+              </div>
+            </div>
+          </SidebarGroupContent>
+        </SidebarGroup>
+      </div>
     );
   }
 
   if (isLoading) {
     return (
-      <SidebarGroup>
-        <div className="px-2 py-1 text-xs text-sidebar-foreground/50">
-          今天
-        </div>
-        <SidebarGroupContent>
-          <div className="flex flex-col">
-            {[44, 32, 28, 64, 52].map((item) => (
-              <div
-                key={item}
-                className="rounded-md h-8 flex gap-2 px-2 items-center"
-              >
-                <div
-                  className="h-4 rounded-md flex-1 max-w-[--skeleton-width] bg-sidebar-accent-foreground/10"
-                  style={
-                    {
-                      '--skeleton-width': `${item}%`,
-                    } as React.CSSProperties
-                  }
-                />
-              </div>
-            ))}
+      <div className="flex flex-col h-full">
+        <SidebarGroup>
+          <div className="px-2 py-1 text-xs text-sidebar-foreground/50">
+            今天
           </div>
-        </SidebarGroupContent>
-      </SidebarGroup>
+          <SidebarGroupContent>
+            <div className="flex flex-col">
+              {[44, 32, 28, 64, 52].map((item) => (
+                <div
+                  key={item}
+                  className="rounded-md h-8 flex gap-2 px-2 items-center"
+                >
+                  <div
+                    className="h-4 rounded-md flex-1 max-w-[--skeleton-width] bg-sidebar-accent-foreground/10"
+                    style={
+                      {
+                        '--skeleton-width': `${item}%`,
+                      } as React.CSSProperties
+                    }
+                  />
+                </div>
+              ))}
+            </div>
+          </SidebarGroupContent>
+        </SidebarGroup>
+      </div>
     );
   }
 
   if (history?.length === 0) {
     return (
-      <SidebarGroup>
-        <SidebarGroupContent>
-          <div className="px-2 text-zinc-500 w-full flex flex-row justify-center items-center text-sm gap-2">
-            开始聊天后，您的对话将显示在这里！
-          </div>
-        </SidebarGroupContent>
-      </SidebarGroup>
+      <div className="flex flex-col h-full">
+        <SidebarGroup>
+          <SidebarGroupContent>
+            <div className="px-2 py-4 flex flex-col gap-4">
+              <Button
+                variant="default"
+                size="sm"
+                className="w-full flex items-center gap-2"
+                onClick={() => {
+                  router.push('/');
+                  router.refresh();
+                  setOpenMobile(false);
+                }}
+              >
+                <PlusIcon />
+                <span>新建聊天</span>
+              </Button>
+              <div className="text-zinc-500 w-full flex flex-row justify-center items-center text-sm gap-2">
+                开始聊天后，您的对话将显示在这里！
+              </div>
+            </div>
+          </SidebarGroupContent>
+        </SidebarGroup>
+      </div>
     );
   }
 
@@ -280,7 +319,27 @@ export function SidebarHistory({ user }: { user: User | undefined }) {
   };
 
   return (
-    <>
+    <div className="flex flex-col h-full">
+      <SidebarGroup>
+        <SidebarGroupContent>
+          <div className="px-2 py-2">
+            <Button
+              variant="default"
+              size="sm"
+              className="w-full flex items-center gap-2"
+              onClick={() => {
+                router.push('/');
+                router.refresh();
+                setOpenMobile(false);
+              }}
+            >
+              <PlusIcon />
+              <span>新建聊天</span>
+            </Button>
+          </div>
+        </SidebarGroupContent>
+      </SidebarGroup>
+      
       <SidebarGroup>
         <SidebarGroupContent>
           <SidebarMenu>
@@ -411,6 +470,6 @@ export function SidebarHistory({ user }: { user: User | undefined }) {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </>
+    </div>
   );
 }

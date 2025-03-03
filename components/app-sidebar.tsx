@@ -3,10 +3,8 @@
 import type { User } from 'next-auth';
 import { useRouter } from 'next/navigation';
 
-import { PlusIcon } from '@/components/icons';
 import { SidebarHistory } from '@/components/sidebar-history';
 import { SidebarUserNav } from '@/components/sidebar-user-nav';
-import { Button } from '@/components/ui/button';
 import {
   Sidebar,
   SidebarContent,
@@ -16,16 +14,15 @@ import {
   useSidebar,
 } from '@/components/ui/sidebar';
 import Link from 'next/link';
-import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
 
 export function AppSidebar({ user }: { user: User | undefined }) {
   const router = useRouter();
   const { setOpenMobile } = useSidebar();
 
   return (
-    <Sidebar className="group-data-[side=left]:border-r-0">
-      <SidebarHeader>
-        <SidebarMenu>
+    <Sidebar className="group-data-[side=left]:border-r-0 flex flex-col">
+      <SidebarHeader className="flex-shrink-0 h-[52px] flex items-center">
+        <SidebarMenu className="px-2 w-full">
           <div className="flex flex-row justify-between items-center">
             <Link
               href="/"
@@ -38,30 +35,15 @@ export function AppSidebar({ user }: { user: User | undefined }) {
                 聊天机器人
               </span>
             </Link>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  type="button"
-                  className="p-2 h-fit"
-                  onClick={() => {
-                    setOpenMobile(false);
-                    router.push('/');
-                    router.refresh();
-                  }}
-                >
-                  <PlusIcon />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent align="end">新建聊天</TooltipContent>
-            </Tooltip>
           </div>
         </SidebarMenu>
       </SidebarHeader>
-      <SidebarContent>
-        <SidebarHistory user={user} />
-      </SidebarContent>
-      <SidebarFooter>{user && <SidebarUserNav user={user} />}</SidebarFooter>
+      <div className="flex-1 overflow-hidden flex flex-col min-h-0">
+        <SidebarContent className="flex-1">
+          <SidebarHistory user={user} />
+        </SidebarContent>
+      </div>
+      <SidebarFooter className="flex-shrink-0">{user && <SidebarUserNav user={user} />}</SidebarFooter>
     </Sidebar>
   );
 }
