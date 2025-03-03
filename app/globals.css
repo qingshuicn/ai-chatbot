@@ -30,67 +30,67 @@
         --card-foreground: 222 47% 11%;
         --popover: 0 0% 100%;
         --popover-foreground: 222 47% 11%;
-        --primary: 221 83% 53%;
+        --primary: 262 83% 58%;
         --primary-foreground: 210 40% 98%;
-        --secondary: 210 40% 96.1%;
-        --secondary-foreground: 222 47% 11%;
+        --secondary: 199 89% 48%;
+        --secondary-foreground: 210 40% 98%;
         --muted: 210 40% 96.1%;
         --muted-foreground: 215 16% 47%;
-        --accent: 210 40% 96.1%;
-        --accent-foreground: 222 47% 11%;
+        --accent: 340 82% 52%;
+        --accent-foreground: 210 40% 98%;
         --destructive: 0 84.2% 60.2%;
         --destructive-foreground: 210 40% 98%;
         --border: 214 32% 91%;
         --input: 214 32% 91%;
-        --ring: 221 83% 53%;
-        --chart-1: 221 83% 53%;
-        --chart-2: 173 58% 39%;
-        --chart-3: 197 37% 24%;
-        --chart-4: 43 74% 66%;
-        --chart-5: 27 87% 67%;
-        --radius: 0.5rem;
-        --sidebar-background: 210 40% 98%;
+        --ring: 262 83% 58%;
+        --chart-1: 262 83% 58%;
+        --chart-2: 199 89% 48%;
+        --chart-3: 340 82% 52%;
+        --chart-4: 43 96% 56%;
+        --chart-5: 152 76% 44%;
+        --radius: 0.75rem;
+        --sidebar-background: 262 30% 95%;
         --sidebar-foreground: 222 47% 11%;
-        --sidebar-primary: 221 83% 53%;
+        --sidebar-primary: 262 83% 58%;
         --sidebar-primary-foreground: 210 40% 98%;
-        --sidebar-accent: 210 40% 96.1%;
+        --sidebar-accent: 262 30% 90%;
         --sidebar-accent-foreground: 222 47% 11%;
-        --sidebar-border: 214 32% 91%;
-        --sidebar-ring: 221 83% 53%;
+        --sidebar-border: 262 30% 85%;
+        --sidebar-ring: 262 83% 58%;
     }
     .dark {
-        --background: 222 47% 11%;
+        --background: 224 40% 8%;
         --foreground: 210 40% 98%;
-        --card: 222 47% 11%;
+        --card: 224 40% 10%;
         --card-foreground: 210 40% 98%;
-        --popover: 222 47% 11%;
+        --popover: 224 40% 10%;
         --popover-foreground: 210 40% 98%;
-        --primary: 217 91% 60%;
-        --primary-foreground: 222 47% 11%;
-        --secondary: 217 32% 17%;
+        --primary: 263 70% 60%;
+        --primary-foreground: 210 40% 98%;
+        --secondary: 199 80% 40%;
         --secondary-foreground: 210 40% 98%;
-        --muted: 217 32% 17%;
+        --muted: 224 30% 15%;
         --muted-foreground: 215 20% 65%;
-        --accent: 217 32% 17%;
+        --accent: 340 70% 50%;
         --accent-foreground: 210 40% 98%;
         --destructive: 0 62.8% 30.6%;
         --destructive-foreground: 210 40% 98%;
-        --border: 217 32% 17%;
-        --input: 217 32% 17%;
-        --ring: 224 76% 48%;
-        --chart-1: 220 70% 50%;
-        --chart-2: 160 60% 45%;
-        --chart-3: 30 80% 55%;
-        --chart-4: 280 65% 60%;
-        --chart-5: 340 75% 55%;
-        --sidebar-background: 222 47% 11%;
+        --border: 224 30% 15%;
+        --input: 224 30% 15%;
+        --ring: 263 70% 50%;
+        --chart-1: 263 70% 60%;
+        --chart-2: 199 80% 40%;
+        --chart-3: 340 70% 50%;
+        --chart-4: 43 90% 50%;
+        --chart-5: 152 70% 40%;
+        --sidebar-background: 224 40% 10%;
         --sidebar-foreground: 210 40% 98%;
-        --sidebar-primary: 217 91% 60%;
+        --sidebar-primary: 263 70% 60%;
         --sidebar-primary-foreground: 0 0% 100%;
-        --sidebar-accent: 217 32% 17%;
+        --sidebar-accent: 224 30% 15%;
         --sidebar-accent-foreground: 210 40% 98%;
-        --sidebar-border: 217 32% 17%;
-        --sidebar-ring: 224 76% 48%;
+        --sidebar-border: 224 30% 20%;
+        --sidebar-ring: 263 70% 50%;
     }
 }
 
@@ -135,6 +135,45 @@
     .skeleton-div {
         @apply bg-foreground/20 animate-pulse;
     }
+}
+
+/* 添加动画效果 */
+@keyframes gradient-shift {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+.gradient-animate {
+    background-size: 200% 200%;
+    animation: gradient-shift 15s ease infinite;
+}
+
+.message-bubble-user {
+    @apply bg-gradient-to-r from-primary to-secondary text-white px-4 py-3 rounded-2xl shadow-md;
+    position: relative;
+    overflow: hidden;
+}
+
+.message-bubble-user::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%);
+    z-index: 1;
+}
+
+.message-bubble-assistant {
+    @apply bg-white dark:bg-zinc-800 px-4 py-3 rounded-2xl shadow-sm border border-zinc-200 dark:border-zinc-700;
 }
 
 .ProseMirror {

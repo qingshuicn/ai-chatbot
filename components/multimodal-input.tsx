@@ -24,6 +24,7 @@ import { useLocalStorage, useWindowSize } from 'usehooks-ts';
 import { sanitizeUIMessages } from '@/lib/utils';
 
 import { ArrowUpIcon, PaperclipIcon, StopIcon } from './icons';
+import { ModelSelector } from './model-selector';
 import { PreviewAttachment } from './preview-attachment';
 import { Button } from './ui/button';
 import { Textarea } from './ui/textarea';
@@ -43,6 +44,7 @@ function PureMultimodalInput({
   append,
   handleSubmit,
   className,
+  selectedModelId,
 }: {
   chatId: string;
   input: string;
@@ -64,6 +66,7 @@ function PureMultimodalInput({
     chatRequestOptions?: ChatRequestOptions,
   ) => void;
   className?: string;
+  selectedModelId: string;
 }) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { width } = useWindowSize();
@@ -254,8 +257,16 @@ function PureMultimodalInput({
         }}
       />
 
-      <div className="absolute bottom-0 p-2 w-fit flex flex-row justify-start">
+      <div className="absolute bottom-0 p-2 w-fit flex flex-row justify-start items-center gap-2">
         <AttachmentsButton fileInputRef={fileInputRef} isLoading={isLoading} />
+        {selectedModelId && (
+          <div className="ml-1">
+            <ModelSelector
+              selectedModelId={selectedModelId}
+              className="text-xs h-7 px-2 py-1"
+            />
+          </div>
+        )}
       </div>
 
       <div className="absolute bottom-0 right-0 p-2 w-fit flex flex-row justify-end">
@@ -279,6 +290,7 @@ export const MultimodalInput = memo(
     if (prevProps.input !== nextProps.input) return false;
     if (prevProps.isLoading !== nextProps.isLoading) return false;
     if (!equal(prevProps.attachments, nextProps.attachments)) return false;
+    if (prevProps.selectedModelId !== nextProps.selectedModelId) return false;
 
     return true;
   },

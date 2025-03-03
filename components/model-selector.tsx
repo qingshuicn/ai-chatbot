@@ -35,16 +35,16 @@ export function ModelSelector({
       <DropdownMenuTrigger
         asChild
         className={cn(
-          'w-fit data-[state=open]:bg-accent data-[state=open]:text-accent-foreground',
+          'w-fit data-[state=open]:bg-accent/20 data-[state=open]:text-accent',
           className,
         )}
       >
-        <Button variant="outline" className="md:px-2 md:h-[34px]">
+        <Button variant="ghost" className={cn("md:px-2 md:h-[34px] font-medium", className)}>
           {selectedChatModel?.name}
-          <ChevronDownIcon />
+          <ChevronDownIcon className="ml-1 h-4 w-4 opacity-70" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="start" className="min-w-[300px]">
+      <DropdownMenuContent align="start" className="min-w-[300px] bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md border border-zinc-200 dark:border-zinc-800">
         {chatModels.map((chatModel) => {
           const { id } = chatModel;
 
@@ -59,17 +59,17 @@ export function ModelSelector({
                   saveChatModelAsCookie(id);
                 });
               }}
-              className="gap-4 group/item flex flex-row justify-between items-center"
+              className="gap-4 group/item flex flex-row justify-between items-center hover:bg-primary/10 dark:hover:bg-primary/20"
               data-active={id === optimisticModelId}
             >
               <div className="flex flex-col gap-1 items-start">
-                <div>{chatModel.name}</div>
+                <div className="font-medium">{chatModel.name}</div>
                 <div className="text-xs text-muted-foreground">
                   {chatModel.description}
                 </div>
               </div>
 
-              <div className="text-foreground dark:text-foreground opacity-0 group-data-[active=true]/item:opacity-100">
+              <div className="text-primary dark:text-primary opacity-0 group-data-[active=true]/item:opacity-100">
                 <CheckCircleFillIcon />
               </div>
             </DropdownMenuItem>

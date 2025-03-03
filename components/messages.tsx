@@ -36,7 +36,7 @@ function PureMessages({
   return (
     <div
       ref={messagesContainerRef}
-      className="flex flex-col min-w-0 gap-8 flex-1 overflow-y-scroll pt-6 pb-4 bg-gradient-to-b from-blue-50/50 to-white dark:from-zinc-900/50 dark:to-zinc-900"
+      className="flex flex-col min-w-0 gap-8 flex-1 overflow-y-scroll pt-6 pb-4 bg-transparent"
     >
       {messages.length === 0 && <Overview />}
 

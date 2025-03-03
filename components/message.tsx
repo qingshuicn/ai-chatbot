@@ -114,8 +114,8 @@ const PurePreviewMessage = ({
 
                 <div
                   className={cn('flex flex-col gap-4', {
-                    'bg-gradient-to-r from-blue-500 to-blue-600 text-white px-4 py-3 rounded-2xl shadow-sm':
-                      message.role === 'user',
+                    'message-bubble-user': message.role === 'user',
+                    'message-bubble-assistant': message.role === 'assistant'
                   })}
                 >
                   <Markdown>{message.content as string}</Markdown>
@@ -244,19 +244,19 @@ export const ThinkingMessage = () => {
   return (
     <div className="w-full mx-auto max-w-3xl px-4">
       <div className="flex gap-4 w-full">
-        <div className="size-8 flex items-center rounded-full justify-center ring-1 shrink-0 ring-border bg-background">
+        <div className="size-8 flex items-center rounded-full justify-center ring-1 shrink-0 ring-primary/30 bg-primary/5 dark:bg-primary/10">
           <div className="translate-y-px">
-            <SparklesIcon size={14} />
+            <SparklesIcon size={14} className="text-primary" />
           </div>
         </div>
 
         <div className="flex flex-col gap-4 w-full">
           <div className="flex flex-row gap-2 items-start">
-            <div className="group flex flex-col w-full overflow-hidden">
+            <div className="message-bubble-assistant">
               <div className="min-h-[20px] flex flex-col items-start gap-4 whitespace-pre-wrap break-words">
                 <div className="prose prose-neutral dark:prose-invert">
-                  <p className="flex items-center gap-1 text-muted-foreground">
-                    <LoaderIcon className="animate-spin" size={14} />
+                  <p className="flex items-center gap-2 text-primary/80 font-medium">
+                    <LoaderIcon className="animate-spin" size={16} />
                     思考中...
                   </p>
                 </div>
