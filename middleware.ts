@@ -5,5 +5,12 @@ import { authConfig } from '@/app/(auth)/auth.config';
 export default NextAuth(authConfig).auth;
 
 export const config = {
-  matcher: ['/', '/:id', '/api/:path*', '/login', '/register'],
+  // 使用正则表达式排除测试端点
+  matcher: [
+    '/', 
+    '/:id', 
+    '/api/((?!test-bailian).*)',
+    '/login', 
+    '/register'
+  ],
 };

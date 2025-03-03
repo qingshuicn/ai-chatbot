@@ -1,27 +1,13 @@
-import { openai } from '@ai-sdk/openai';
-import { fireworks } from '@ai-sdk/fireworks';
-import {
-  customProvider,
-  extractReasoningMiddleware,
-  wrapLanguageModel,
-} from 'ai';
+import { customProvider } from 'ai';
+import { bailian } from './providers/bailian';
 
-export const DEFAULT_CHAT_MODEL: string = 'chat-model-small';
+export const DEFAULT_CHAT_MODEL: string = 'bailian-qwen';
 
 export const myProvider = customProvider({
   languageModels: {
-    'chat-model-small': openai('gpt-4o-mini'),
-    'chat-model-large': openai('gpt-4o'),
-    'chat-model-reasoning': wrapLanguageModel({
-      model: fireworks('accounts/fireworks/models/deepseek-r1'),
-      middleware: extractReasoningMiddleware({ tagName: 'think' }),
-    }),
-    'title-model': openai('gpt-4-turbo'),
-    'artifact-model': openai('gpt-4o-mini'),
-  },
-  imageModels: {
-    'small-model': openai.image('dall-e-2'),
-    'large-model': openai.image('dall-e-3'),
+    'bailian-qwen': bailian('qwen-max'),
+    'bailian-qwen-long': bailian('qwen-max-longcontext'),
+    'title-model': bailian('qwen-max'),
   },
 });
 
@@ -33,18 +19,13 @@ interface ChatModel {
 
 export const chatModels: Array<ChatModel> = [
   {
-    id: 'chat-model-small',
-    name: 'Small model',
-    description: 'Small model for fast, lightweight tasks',
+    id: 'bailian-qwen',
+    name: '通义千问',
+    description: '阿里百炼通义千问大模型',
   },
   {
-    id: 'chat-model-large',
-    name: 'Large model',
-    description: 'Large model for complex, multi-step tasks',
-  },
-  {
-    id: 'chat-model-reasoning',
-    name: 'Reasoning model',
-    description: 'Uses advanced reasoning',
+    id: 'bailian-qwen-long',
+    name: '通义千问长文本',
+    description: '阿里百炼通义千问长文本大模型，支持更长的上下文',
   },
 ];

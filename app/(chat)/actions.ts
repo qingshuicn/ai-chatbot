@@ -1,6 +1,6 @@
 'use server';
 
-import { generateText, Message } from 'ai';
+import { Message } from 'ai';
 import { cookies } from 'next/headers';
 
 import {
@@ -9,7 +9,7 @@ import {
   updateChatVisiblityById,
 } from '@/lib/db/queries';
 import { VisibilityType } from '@/components/visibility-selector';
-import { myProvider } from '@/lib/ai/models';
+import { generateTitleWithBailian } from '@/lib/ai/providers/bailian';
 
 export async function saveChatModelAsCookie(model: string) {
   const cookieStore = await cookies();
@@ -21,21 +21,25 @@ export async function generateTitleFromUserMessage({
 }: {
   message: Message;
 }) {
-  const { text: title } = await generateText({
-    model: myProvider.languageModel('title-model'),
-    system: `\n
-    - you will generate a short title based on the first message a user begins a conversation with
-    - ensure it is not more than 80 characters long
-    - the title should be a summary of the user's message
-    - do not use quotes or colons`,
-    prompt: JSON.stringify(message),
-  });
-
-  return title;
+  try {
+    // 使用百炼模型生成标题
+    if (!process.env.DASHSCOPE_TOKEN) {
+      console.error('缺少 DASHSCOPE_TOKEN 环境变量');
+      return '新对话';
+    }
+    
+    const title = await generateTitleWithBailian({ message });
+    return title;
+  } catch (error) {
+    console.error('生成标题时出错:', error);
+    return '新对话';
+  }
 }
 
 export async function deleteTrailingMessages({ id }: { id: string }) {
-  const [message] = await getMessageById({ id });
+  const messages = await getMessageById({ id });
+  if (!messages || messages.length === 0) return;
+  const message = messages[0];
 
   await deleteMessagesByChatIdAfterTimestamp({
     chatId: message.chatId,
@@ -50,5 +54,8 @@ export async function updateChatVisibility({
   chatId: string;
   visibility: VisibilityType;
 }) {
-  await updateChatVisiblityById({ chatId, visibility });
+  await updateChatVisiblityById({
+    chatId,
+    visibility,
+  });
 }
