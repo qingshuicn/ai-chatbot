@@ -109,9 +109,17 @@ const PureChatItem = ({
   isLocalChat?: boolean;
 }) => {
   // 只有在非本地聊天时才使用可见性功能
+  const initialVisibility = (() => {
+    // 检查是否为本地聊天
+    if (isLocalChat) return 'private';
+    // 检查是否有 visibility 属性
+    if ('visibility' in chat) return chat.visibility;
+    return 'private';
+  })();
+
   const { visibilityType, setVisibilityType } = useChatVisibility({
     chatId: chat.id,
-    initialVisibility: 'chat' in chat ? chat.visibility : 'private',
+    initialVisibility,
   });
 
   return (

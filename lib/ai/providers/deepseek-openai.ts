@@ -2,10 +2,10 @@ import {
   customProvider,
   LanguageModelV1,
   LanguageModelV1CallOptions,
-  LanguageModelV1FinishReason,
-  LanguageModelV1StreamPart
+  LanguageModelV1StreamPart,
+  Message
 } from 'ai';
-import { Message } from 'ai';
+import { LanguageModelV1FinishReason } from '@ai-sdk/provider';
 
 /**
  * 创建DeepSeek模型提供商（使用OpenAI兼容API）
@@ -14,7 +14,10 @@ import { Message } from 'ai';
  */
 export function deepseekOpenAI(model: string): LanguageModelV1 {
   return {
-    id: `deepseek-${model}`,
+    provider: 'deepseek',
+    modelId: model,
+    specificationVersion: 'v1',
+    defaultObjectGenerationMode: 'json',
     
     // 实现 doGenerate 方法用于文本生成
     async doGenerate(options: LanguageModelV1CallOptions) {
@@ -65,12 +68,9 @@ export function deepseekOpenAI(model: string): LanguageModelV1 {
           usage: {
             promptTokens: data.usage?.prompt_tokens || 0,
             completionTokens: data.usage?.completion_tokens || 0,
-            totalTokens: data.usage?.total_tokens || 0,
           },
-          // 添加思考过程
-          additionalData: {
-            reasoningContent
-          }
+          // 使用 reasoning 而不是 additionalData
+          reasoning: reasoningContent
         };
       } catch (error) {
         console.error('DeepSeek API调用失败:', error);
@@ -163,7 +163,6 @@ export function deepseekOpenAI(model: string): LanguageModelV1 {
                   usage: {
                     promptTokens,
                     completionTokens,
-                    totalTokens: promptTokens + completionTokens
                   }
                 });
                 

@@ -1,5 +1,4 @@
-import { customProvider, LanguageModelV1, LanguageModelV1CallOptions, LanguageModelV1FinishReason, LanguageModelV1StreamPart } from 'ai';
-import { Message } from 'ai';
+import { customProvider, LanguageModelV1, LanguageModelV1CallOptions, LanguageModelV1StreamPart, Message } from 'ai';
 
 // 这里需要安装 dashscope-node 包
 // npm install dashscope-node
@@ -9,6 +8,12 @@ type DashScopeOptions = {
   temperature?: number;
   topP?: number;
   maxTokens?: number;
+};
+
+// 定义百炼API的消息类型
+type BailianMessage = {
+  role: 'user' | 'system' | 'assistant' | 'tool';
+  content: string;
 };
 
 /**
@@ -23,7 +28,10 @@ export function bailian(
 ): LanguageModelV1 {
   // 使用正确的 API 创建自定义语言模型
   return {
-    id: `bailian-${model}`,
+    provider: 'bailian',
+    modelId: model,
+    specificationVersion: 'v1',
+    defaultObjectGenerationMode: 'json',
     
     // 实现 doGenerate 方法用于文本生成
     async doGenerate(options: LanguageModelV1CallOptions) {
@@ -31,17 +39,17 @@ export function bailian(
       const dashscope = await importDashScope();
       
       // 获取环境变量中的 API 密钥
-      const apiKey = process.env.DASHSCOPE_TOKEN || options.apiKey;
+      const apiKey = process.env.DASHSCOPE_TOKEN;
       
       if (!apiKey) {
-        throw new Error('缺少 DASHSCOPE_TOKEN 环境变量或 apiKey 选项');
+        throw new Error('缺少 DASHSCOPE_TOKEN 环境变量');
       }
       
       // 准备消息
       const messages = prepareMessages(options.prompt);
       
       // 准备请求参数
-      const params = {
+      const params: any = {
         model: model,
         input: {
           messages: messages,
@@ -61,7 +69,7 @@ export function bailian(
         // 返回符合 LanguageModelV1 接口的响应格式
         return {
           text: response.output.text,
-          finishReason: 'stop' as LanguageModelV1FinishReason,
+          finishReason: 'stop',
           // 添加其他必要的字段
           rawCall: {
             rawPrompt: options.prompt,
@@ -74,7 +82,6 @@ export function bailian(
           usage: {
             promptTokens: response.usage?.input_tokens || 0,
             completionTokens: response.usage?.output_tokens || 0,
-            totalTokens: (response.usage?.input_tokens || 0) + (response.usage?.output_tokens || 0),
           },
         };
       } else {
@@ -88,17 +95,17 @@ export function bailian(
       const dashscope = await importDashScope();
       
       // 获取环境变量中的 API 密钥
-      const apiKey = process.env.DASHSCOPE_TOKEN || options.apiKey;
+      const apiKey = process.env.DASHSCOPE_TOKEN;
       
       if (!apiKey) {
-        throw new Error('缺少 DASHSCOPE_TOKEN 环境变量或 apiKey 选项');
+        throw new Error('缺少 DASHSCOPE_TOKEN 环境变量');
       }
       
       // 准备消息
       const messages = prepareMessages(options.prompt);
       
       // 准备请求参数
-      const params = {
+      const params: any = {
         model: model,
         input: {
           messages: messages,
@@ -137,8 +144,7 @@ export function bailian(
                     finishReason: 'stop',
                     usage: {
                       promptTokens,
-                      completionTokens,
-                      totalTokens: promptTokens + completionTokens
+                      completionTokens
                     }
                   });
                   
@@ -152,12 +158,15 @@ export function bailian(
                 if (value?.data?.output?.text !== undefined) {
                   text = value.data.output.text;
                   console.log(`结构1生成文本: ${text}`);
-                } else if (value?.output?.text !== undefined) {
-                  text = value.output.text;
+                } else if (value?.data?.output !== undefined) {
+                  text = value.data.output;
                   console.log(`结构2生成文本: ${text}`);
                 } else if (typeof value === 'string') {
                   text = value;
                   console.log(`结构3生成文本: ${text}`);
+                } else if (value && 'output' in value) {
+                  text = (value as any).output;
+                  console.log(`结构4生成文本: ${text}`);
                 }
                 
                 if (text !== null && text !== '') {
@@ -200,14 +209,39 @@ export function bailian(
 }
 
 // 辅助函数：准备消息
-function prepareMessages(prompt: LanguageModelV1CallOptions['prompt']) {
+function prepareMessages(prompt: LanguageModelV1CallOptions['prompt']): BailianMessage[] {
   if (typeof prompt === 'string') {
     return [{ role: 'user', content: prompt }];
   } else if (Array.isArray(prompt)) {
-    return prompt.map((message) => ({
-      role: message.role,
-      content: message.content,
-    }));
+    return prompt.map((message) => {
+      // 确保内容是字符串类型
+      let content = message.content;
+      if (typeof content !== 'string') {
+        // 如果内容不是字符串，尝试将其转换为字符串
+        if (Array.isArray(content)) {
+          // 如果是数组，尝试提取文本部分
+          content = content
+            .filter(part => typeof part === 'object' && part.type === 'text')
+            .map(part => (part as any).text || '')
+            .join('');
+        } else {
+          // 默认转换为空字符串
+          content = '';
+        }
+      }
+      
+      // 确保角色是有效的
+      let role = message.role;
+      if (role !== 'user' && role !== 'system' && role !== 'assistant' && role !== 'tool') {
+        // 如果角色无效，默认为用户
+        role = 'user';
+      }
+      
+      return {
+        role,
+        content,
+      } as BailianMessage;
+    });
   } else {
     return [];
   }
@@ -272,7 +306,7 @@ export async function generateTitleWithBailian({
     - 不要使用引号或冒号`;
     
     // 准备请求参数
-    const params = {
+    const params: any = {
       model: model,
       input: {
         messages: [

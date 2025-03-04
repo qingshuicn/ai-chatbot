@@ -12,21 +12,19 @@ interface MessagesProps {
   messages: Array<Message>;
   votes?: Array<Vote>;
   isLoggedIn?: boolean;
+  setMessages: (messages: Message[] | ((messages: Message[]) => Message[])) => void;
+  reload: (chatRequestOptions?: ChatRequestOptions) => Promise<string | null | undefined>;
 }
 
-function MessagesComponent({
+export function MessagesComponent({
   chatId,
   isLoading,
   messages,
   votes = [],
   isLoggedIn = false,
-}: {
-  chatId: string;
-  isLoading: boolean;
-  messages: Array<Message>;
-  votes?: Array<Vote>;
-  isLoggedIn?: boolean;
-}) {
+  setMessages,
+  reload,
+}: MessagesProps) {
   const [messagesContainerRef, messagesEndRef] =
     useScrollToBottom<HTMLDivElement>();
 
@@ -48,19 +46,15 @@ function MessagesComponent({
               ? votes.find((vote) => vote.messageId === message.id)
               : undefined
           }
+          setMessages={setMessages}
+          reload={reload}
           isReadonly={false}
           isLoggedIn={isLoggedIn}
         />
       ))}
 
-      {isLoading &&
-        messages.length > 0 &&
-        messages[messages.length - 1].role === 'user' && <ThinkingMessage />}
-
-      <div
-        ref={messagesEndRef}
-        className="shrink-0 min-w-[24px] min-h-[24px]"
-      />
+      {isLoading && messages.length === 0 && <ThinkingMessage />}
+      <div ref={messagesEndRef} />
     </div>
   );
 }

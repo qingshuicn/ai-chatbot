@@ -104,7 +104,8 @@ if (artifact.isVisible) {
   if (!document) return <LoadingSkeleton artifactKind={artifact.kind} />;
 
   return (
-    <div className={cn("relative w-full cursor-pointer", className)}> // Use the className prop
+    <div className={cn("relative w-full cursor-pointer", className)}>
+      {/* Use the className prop */}
       <HitboxLayer
         hitboxRef={hitboxRef}
         result={result}

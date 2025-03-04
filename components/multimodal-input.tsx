@@ -121,8 +121,8 @@ function PureMultimodalInput({
 
               newAttachments.push({
                 name: file.name,
-                type: type,
                 url: url,
+                contentType: type,
               });
             } catch (error) {
               console.error('上传文件失败:', error);
@@ -131,12 +131,12 @@ function PureMultimodalInput({
           } else {
             // 未登录用户使用本地 URL
             const url = URL.createObjectURL(file);
-            const type = file.type.startsWith('image/') ? 'image' : 'file';
+            const fileType = file.type.startsWith('image/') ? 'image' : 'file';
             
             newAttachments.push({
               name: file.name,
-              type: type,
               url: url,
+              contentType: file.type
             });
             
             toast.warning('您未登录，附件仅在本次会话有效');
@@ -191,6 +191,7 @@ function PureMultimodalInput({
             <PreviewAttachment
               key={index}
               attachment={attachment}
+              isUploading={false}
               onRemove={() => removeAttachment(index)}
             />
           ))}
@@ -245,8 +246,7 @@ function PureMultimodalInput({
         {!isMobile && (
           <ModelSelector
             selectedModelId={selectedModelId}
-            setSelectedModelId={setSelectedModelId}
-            isLoggedIn={isLoggedIn}
+            className=""
           />
         )}
       </div>
@@ -281,7 +281,7 @@ function PureAttachmentsButton({
       onClick={() => fileInputRef.current?.click()}
       className="h-8 w-8 mr-1"
     >
-      <PaperclipIcon className="h-5 w-5" />
+      <PaperclipIcon size={20} />
     </Button>
   );
 }
@@ -303,7 +303,7 @@ function PureStopButton({
       }}
       className="h-8 w-8"
     >
-      <StopIcon className="h-5 w-5" />
+      <StopIcon size={20} />
     </Button>
   );
 }
@@ -327,7 +327,7 @@ function PureSendButton({
       onClick={submitForm}
       className="h-8 w-8"
     >
-      <ArrowUpIcon className="h-5 w-5" />
+      <ArrowUpIcon size={20} />
     </Button>
   );
 }

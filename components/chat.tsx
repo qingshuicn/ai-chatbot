@@ -69,7 +69,7 @@ export function Chat({
       // 如果有初始消息，标记聊天已创建
       chatCreatedRef.current = true;
     }
-  }, [id, initialMessages, propIsLoggedIn, session]);
+  }, [id, initialMessages, propIsLoggedIn, session, isLoggedIn]);
 
   const {
     messages,
@@ -167,10 +167,28 @@ export function Chat({
           messages={messages}
           votes={votes || []}
           isLoggedIn={isLoggedIn}
+          setMessages={setMessages}
+          reload={reload}
         />
 
         <div className="sticky bottom-0 w-full">
-          {isArtifactVisible && <Artifact isLoggedIn={isLoggedIn} />}
+          {isArtifactVisible && <Artifact 
+            chatId={id}
+            input={input}
+            setInput={setInput}
+            isLoading={isLoading}
+            stop={stop}
+            attachments={attachments}
+            setAttachments={setAttachments}
+            messages={messages}
+            setMessages={setMessages}
+            votes={votes}
+            append={append}
+            handleSubmit={handleSubmit}
+            reload={reload}
+            isReadonly={isReadonly}
+            isLoggedIn={isLoggedIn}
+          />}
 
           <div className="mx-auto sm:max-w-2xl sm:px-4">
             <div className="px-4 py-2 space-y-4 border-t bg-background md:rounded-t-xl md:border md:shadow-lg">

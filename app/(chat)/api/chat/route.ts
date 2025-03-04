@@ -39,6 +39,12 @@ export async function POST(request: Request) {
   const session = await auth();
   const isLoggedIn = !!(session && session.user && session.user.id);
 
+  // 确保 session 不为 null，为工具函数创建一个安全的 session 对象
+  const safeSession = session || {
+    user: { id: 'anonymous', name: 'Anonymous', email: '' },
+    expires: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+  };
+
   const userMessage = getMostRecentUserMessage(messages);
 
   if (!userMessage) {
@@ -48,10 +54,16 @@ export async function POST(request: Request) {
   // 只有登录用户才保存聊天记录到数据库
   if (isLoggedIn) {
     const chat = await getChatById({ id });
+    
+    // 确保 session.user.id 存在
+    const userId = session?.user?.id;
+    if (!userId) {
+      return new Response('用户ID不存在', { status: 400 });
+    }
 
     if (!chat) {
       const title = await generateTitleFromUserMessage({ message: userMessage });
-      await saveChat({ id, userId: session.user.id, title });
+      await saveChat({ id, userId, title });
     }
 
     await saveMessages({
@@ -79,10 +91,10 @@ export async function POST(request: Request) {
         experimental_generateMessageId: generateUUID,
         tools: {
           getWeather,
-          createDocument: createDocument({ session, dataStream }),
-          updateDocument: updateDocument({ session, dataStream }),
+          createDocument: createDocument({ session: safeSession, dataStream }),
+          updateDocument: updateDocument({ session: safeSession, dataStream }),
           requestSuggestions: requestSuggestions({
-            session,
+            session: safeSession,
             dataStream,
           }),
         },

@@ -55,7 +55,6 @@ export default async function RootLayout({
             __html: THEME_COLOR_SCRIPT,
           }}
         />
-        <link rel="stylesheet" href="/styles/thinking-block.css" />
       </head>
       <body className="antialiased">
         <ThemeProvider

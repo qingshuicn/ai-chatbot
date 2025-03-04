@@ -36,7 +36,7 @@ export function AppSidebar({ user }: { user: User | undefined }) {
 
   return (
     <Sidebar className="group-data-[side=left]:border-r-0 flex flex-col">
-      <SidebarHeader className="flex-shrink-0 h-[52px] flex items-center">
+      <SidebarHeader className="shrink-0 h-[52px] flex items-center">
         <SidebarMenu className="px-2 w-full">
           <div className="flex flex-row justify-center items-center">
             <Button
@@ -56,7 +56,7 @@ export function AppSidebar({ user }: { user: User | undefined }) {
           <SidebarHistory user={user} />
         </SidebarContent>
       </div>
-      <SidebarFooter className="flex-shrink-0">{user && <SidebarUserNav user={user} />}</SidebarFooter>
+      <SidebarFooter className="shrink-0">{user && <SidebarUserNav user={user} />}</SidebarFooter>
     </Sidebar>
   );
 }
