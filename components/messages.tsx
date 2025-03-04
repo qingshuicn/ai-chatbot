@@ -9,29 +9,24 @@ import equal from 'fast-deep-equal';
 interface MessagesProps {
   chatId: string;
   isLoading: boolean;
-  votes: Array<Vote> | undefined;
   messages: Array<Message>;
-  setMessages: (
-    messages: Message[] | ((messages: Message[]) => Message[]),
-  ) => void;
-  reload: (
-    chatRequestOptions?: ChatRequestOptions,
-  ) => Promise<string | null | undefined>;
-  isReadonly: boolean;
-  isArtifactVisible: boolean;
+  votes?: Array<Vote>;
   isLoggedIn?: boolean;
 }
 
-function PureMessages({
+function MessagesComponent({
   chatId,
   isLoading,
-  votes,
   messages,
-  setMessages,
-  reload,
-  isReadonly,
-  isLoggedIn = true,
-}: MessagesProps) {
+  votes = [],
+  isLoggedIn = false,
+}: {
+  chatId: string;
+  isLoading: boolean;
+  messages: Array<Message>;
+  votes?: Array<Vote>;
+  isLoggedIn?: boolean;
+}) {
   const [messagesContainerRef, messagesEndRef] =
     useScrollToBottom<HTMLDivElement>();
 
@@ -53,9 +48,7 @@ function PureMessages({
               ? votes.find((vote) => vote.messageId === message.id)
               : undefined
           }
-          setMessages={setMessages}
-          reload={reload}
-          isReadonly={isReadonly}
+          isReadonly={false}
           isLoggedIn={isLoggedIn}
         />
       ))}
@@ -72,9 +65,7 @@ function PureMessages({
   );
 }
 
-export const Messages = memo(PureMessages, (prevProps, nextProps) => {
-  if (prevProps.isArtifactVisible && nextProps.isArtifactVisible) return true;
-
+export const Messages = memo(MessagesComponent, (prevProps, nextProps) => {
   if (prevProps.isLoading !== nextProps.isLoading) return false;
   if (prevProps.isLoading && nextProps.isLoading) return false;
   if (prevProps.messages.length !== nextProps.messages.length) return false;

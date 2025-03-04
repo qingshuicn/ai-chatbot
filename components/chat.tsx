@@ -2,8 +2,9 @@
 
 import type { Attachment, Message } from 'ai';
 import { useChat } from 'ai/react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import useSWR, { useSWRConfig } from 'swr';
+import { useSession } from 'next-auth/react';
 
 import { ChatHeader } from '@/components/chat-header';
 import type { Vote } from '@/lib/db/schema';
@@ -28,15 +29,19 @@ export function Chat({
   selectedChatModel,
   isReadonly,
   isLoggedIn: propIsLoggedIn,
+  onCreateChat,
 }: {
   id: string;
   initialMessages: Array<Message>;
   selectedChatModel: string;
   isReadonly: boolean;
   isLoggedIn?: boolean;
+  onCreateChat?: () => void;
 }) {
   const { mutate } = useSWRConfig();
   const [isLoggedIn, setIsLoggedIn] = useState(propIsLoggedIn ?? false);
+  const chatCreatedRef = useRef(false);
+  const { data: session } = useSession();
   
   // 初始化消息，优先使用服务器提供的初始消息，如果没有则尝试从本地存储加载
   const [initialMessagesState, setInitialMessagesState] = useState<Array<Message>>(
@@ -46,7 +51,8 @@ export function Chat({
   useEffect(() => {
     // 如果没有传入登录状态，则检查用户是否已登录
     if (propIsLoggedIn === undefined) {
-      setIsLoggedIn(isUserLoggedIn());
+      const isLoggedIn = !!session?.user;
+      setIsLoggedIn(isLoggedIn);
     } else {
       setIsLoggedIn(propIsLoggedIn);
     }
@@ -56,9 +62,14 @@ export function Chat({
       const localMessages = getLocalChatMessages(id);
       if (localMessages.length > 0) {
         setInitialMessagesState(localMessages);
+        // 如果有本地消息，标记聊天已创建
+        chatCreatedRef.current = true;
       }
+    } else if (initialMessages.length > 0) {
+      // 如果有初始消息，标记聊天已创建
+      chatCreatedRef.current = true;
     }
-  }, [id, initialMessages, isLoggedIn, propIsLoggedIn]);
+  }, [id, initialMessages, propIsLoggedIn, session]);
 
   const {
     messages,
@@ -92,6 +103,20 @@ export function Chat({
       toast.error(errorMessage);
     },
   });
+
+  // 自定义提交处理函数
+  const handleCustomSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    
+    // 如果是第一次发送消息且未登录，调用 onCreateChat 回调
+    if (!chatCreatedRef.current && !isLoggedIn && onCreateChat) {
+      onCreateChat();
+      chatCreatedRef.current = true;
+    }
+    
+    // 调用原始的提交处理函数
+    handleSubmit(e);
+  };
 
   // 当消息更新时，如果用户未登录，保存到本地存储
   useEffect(() => {
@@ -139,53 +164,33 @@ export function Chat({
         <Messages
           chatId={id}
           isLoading={isLoading}
-          votes={votes}
           messages={messages}
-          setMessages={setMessages}
-          reload={reload}
-          isReadonly={isReadonly}
-          isArtifactVisible={isArtifactVisible}
+          votes={votes || []}
           isLoggedIn={isLoggedIn}
         />
 
-        <form className="flex mx-auto px-4 bg-white/50 dark:bg-zinc-800/50 backdrop-blur-sm py-4 md:py-6 gap-2 w-full md:max-w-3xl rounded-t-xl shadow-lg border-t border-zinc-200 dark:border-zinc-700">
-          {!isReadonly && (
-            <MultimodalInput
-              chatId={id}
-              input={input}
-              setInput={setInput}
-              handleSubmit={handleSubmit}
-              isLoading={isLoading}
-              stop={stop}
-              attachments={attachments}
-              setAttachments={setAttachments}
-              messages={messages}
-              setMessages={setMessages}
-              append={append}
-              selectedModelId={selectedChatModel}
-              isLoggedIn={isLoggedIn}
-            />
-          )}
-        </form>
-      </div>
+        <div className="sticky bottom-0 w-full">
+          {isArtifactVisible && <Artifact isLoggedIn={isLoggedIn} />}
 
-      <Artifact
-        chatId={id}
-        input={input}
-        setInput={setInput}
-        handleSubmit={handleSubmit}
-        isLoading={isLoading}
-        stop={stop}
-        attachments={attachments}
-        setAttachments={setAttachments}
-        append={append}
-        messages={messages}
-        setMessages={setMessages}
-        reload={reload}
-        votes={votes}
-        isReadonly={isReadonly}
-        isLoggedIn={isLoggedIn}
-      />
+          <div className="mx-auto sm:max-w-2xl sm:px-4">
+            <div className="px-4 py-2 space-y-4 border-t bg-background md:rounded-t-xl md:border md:shadow-lg">
+              <form onSubmit={handleCustomSubmit} className="relative">
+                <MultimodalInput
+                  input={input}
+                  setInput={setInput}
+                  isLoading={isLoading}
+                  stop={stop}
+                  reload={reload}
+                  messages={messages}
+                  attachments={attachments}
+                  setAttachments={setAttachments}
+                  isLoggedIn={isLoggedIn}
+                />
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
     </>
   );
 }

@@ -3,7 +3,7 @@ import { generateUUID } from './utils';
 
 // 本地存储键名
 const CHAT_HISTORY_KEY = 'ai-chatbot-history';
-const CHAT_MESSAGES_KEY_PREFIX = 'ai-chatbot-messages-';
+export const CHAT_MESSAGES_KEY_PREFIX = 'ai-chatbot-messages-';
 const CURRENT_CHAT_ID_KEY = 'ai-chatbot-current-chat';
 
 // 本地存储聊天历史记录类型
@@ -174,9 +174,18 @@ export function saveLocalChatMessages(chatId: string, messages: Message[]): void
 export function isUserLoggedIn(): boolean {
   if (typeof window === 'undefined') return false;
   
-  // 这里需要根据项目的认证机制来实现
-  // 例如，检查是否存在认证令牌或会话cookie
-  return document.cookie.includes('next-auth.session-token');
+  // 检查多种可能的会话令牌格式
+  const hasSessionToken = 
+    document.cookie.includes('next-auth.session-token') || 
+    document.cookie.includes('__Secure-next-auth.session-token') ||
+    document.cookie.includes('__Host-next-auth.session-token');
+    
+  // 检查是否存在 .csrf-token cookie，这通常也表示用户已登录
+  const hasCsrfToken = 
+    document.cookie.includes('next-auth.csrf-token') ||
+    document.cookie.includes('__Host-next-auth.csrf-token');
+    
+  return hasSessionToken || hasCsrfToken;
 }
 
 /**

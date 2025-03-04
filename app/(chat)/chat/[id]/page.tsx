@@ -3,6 +3,7 @@
 import { useEffect, useState, use } from 'react';
 import { useRouter } from 'next/navigation';
 import { Message } from 'ai';
+import { useSession } from 'next-auth/react';
 
 import { Chat } from '@/components/chat';
 import { DataStreamHandler } from '@/components/data-stream-handler';
@@ -18,13 +19,14 @@ export default function Page({ params }: { params: { id: string } }) {
   const [selectedModel, setSelectedModel] = useState(DEFAULT_CHAT_MODEL);
   const [isReadonly, setIsReadonly] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const { data: session } = useSession();
 
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
       
       // 检查用户是否登录
-      const loggedIn = isUserLoggedIn();
+      const loggedIn = !!session?.user;
       setIsLoggedIn(loggedIn);
       
       if (loggedIn) {
@@ -72,7 +74,7 @@ export default function Page({ params }: { params: { id: string } }) {
     };
     
     fetchData();
-  }, [id, router]);
+  }, [id, router, session]);
   
   if (isLoading) {
     return <div className="flex items-center justify-center h-screen">加载中...</div>;

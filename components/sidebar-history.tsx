@@ -7,6 +7,8 @@ import type { User } from 'next-auth';
 import { memo, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import useSWR from 'swr';
+import { generateUUID } from '@/lib/utils';
+import { getLocalChatHistory, deleteLocalChat, setCurrentChatId, createLocalChat, generateDefaultTitle, LocalChatHistory, CHAT_MESSAGES_KEY_PREFIX } from '@/lib/local-storage';
 
 import {
   CheckCircleFillIcon,
@@ -51,11 +53,6 @@ import {
 import type { Chat } from '@/lib/db/schema';
 import { fetcher } from '@/lib/utils';
 import { useChatVisibility } from '@/hooks/use-chat-visibility';
-import { 
-  getLocalChatHistory, 
-  deleteLocalChat, 
-  LocalChatHistory 
-} from '@/lib/local-storage';
 
 type GroupedChats = {
   today: (Chat | LocalChatHistory)[];
@@ -279,8 +276,14 @@ export function SidebarHistory({ user }: { user: User | undefined }) {
                 size="sm"
                 className="w-full flex items-center gap-2"
                 onClick={() => {
-                  router.push('/');
-                  router.refresh();
+                  // 创建新的本地聊天记录
+                  const newChatId = createLocalChat(generateDefaultTitle(), 'gpt-3.5-turbo');
+                  
+                  // 清除当前会话的消息
+                  localStorage.removeItem(`${CHAT_MESSAGES_KEY_PREFIX}${newChatId}`);
+                  
+                  // 导航到根页面，添加时间戳参数以触发页面重新渲染
+                  router.push(`/chat/${newChatId}`);
                   setOpenMobile(false);
                 }}
               >
@@ -468,7 +471,7 @@ export function SidebarHistory({ user }: { user: User | undefined }) {
                 size="sm"
                 className="w-full flex items-center gap-2"
                 onClick={() => {
-                  router.push('/');
+                  router.replace(`/?t=${Date.now()}`);
                   router.refresh();
                   setOpenMobile(false);
                 }}
@@ -496,7 +499,7 @@ export function SidebarHistory({ user }: { user: User | undefined }) {
               size="sm"
               className="w-full flex items-center gap-2"
               onClick={() => {
-                router.push('/');
+                router.replace(`/?t=${Date.now()}`);
                 router.refresh();
                 setOpenMobile(false);
               }}

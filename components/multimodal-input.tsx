@@ -2,8 +2,6 @@
 
 import type {
   Attachment,
-  ChatRequestOptions,
-  CreateMessage,
   Message,
 } from 'ai';
 import cx from 'classnames';
@@ -32,7 +30,6 @@ import { SuggestedActions } from './suggested-actions';
 import equal from 'fast-deep-equal';
 
 function PureMultimodalInput({
-  chatId,
   input,
   setInput,
   isLoading,
@@ -40,14 +37,10 @@ function PureMultimodalInput({
   attachments,
   setAttachments,
   messages,
-  setMessages,
-  append,
-  handleSubmit,
+  reload,
   className,
-  selectedModelId,
   isLoggedIn,
 }: {
-  chatId: string;
   input: string;
   setInput: (value: string) => void;
   isLoading: boolean;
@@ -55,230 +48,205 @@ function PureMultimodalInput({
   attachments: Array<Attachment>;
   setAttachments: Dispatch<SetStateAction<Array<Attachment>>>;
   messages: Array<Message>;
-  setMessages: Dispatch<SetStateAction<Array<Message>>>;
-  append: (
-    message: Message | CreateMessage,
-    chatRequestOptions?: ChatRequestOptions,
-  ) => Promise<string | null | undefined>;
-  handleSubmit: (
-    event?: {
-      preventDefault?: () => void;
-    },
-    chatRequestOptions?: ChatRequestOptions,
-  ) => void;
+  reload?: () => void;
   className?: string;
-  selectedModelId: string;
   isLoggedIn?: boolean;
 }) {
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const { width } = useWindowSize();
+  const [uploadQueue, setUploadQueue] = useState<Array<string>>([]);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const textAreaRef = useRef<HTMLTextAreaElement | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [selectedModelId, setSelectedModelId] = useLocalStorage(
+    'chat-model',
+    'chat-model-default',
+  );
+  const windowSize = useWindowSize();
+  const isMobile = windowSize.width < 640;
 
-  useEffect(() => {
-    if (textareaRef.current) {
-      adjustHeight();
-    }
-  }, []);
-
-  const adjustHeight = () => {
-    if (textareaRef.current) {
-      textareaRef.current.style.height = 'auto';
-      textareaRef.current.style.height = `${textareaRef.current.scrollHeight + 2}px`;
-    }
-  };
-
-  const resetHeight = () => {
-    if (textareaRef.current) {
-      textareaRef.current.style.height = 'auto';
-      textareaRef.current.style.height = '98px';
-    }
-  };
-
-  const [localStorageInput, setLocalStorageInput] = useLocalStorage(
-    'input',
-    '',
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        const form = e.currentTarget.form;
+        if (form) {
+          form.dispatchEvent(
+            new Event('submit', { cancelable: true, bubbles: true }),
+          );
+        }
+      }
+    },
+    [],
   );
 
-  useEffect(() => {
-    if (textareaRef.current) {
-      const domValue = textareaRef.current.value;
-      // Prefer DOM value over localStorage to handle hydration
-      const finalValue = domValue || localStorageInput || '';
-      setInput(finalValue);
-      adjustHeight();
-    }
-    // Only run once after hydration
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  useEffect(() => {
-    setLocalStorageInput(input);
-  }, [input, setLocalStorageInput]);
-
-  const handleInput = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setInput(event.target.value);
-    adjustHeight();
-  };
-
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const [uploadQueue, setUploadQueue] = useState<Array<string>>([]);
-
   const submitForm = useCallback(() => {
-    window.history.replaceState({}, '', `/chat/${chatId}`);
-
-    handleSubmit(undefined, {
-      experimental_attachments: attachments,
-    });
-
-    setAttachments([]);
-    setLocalStorageInput('');
-    resetHeight();
-
-    if (width && width > 768) {
-      textareaRef.current?.focus();
+    if (isLoading) return;
+    const form = textAreaRef.current?.form;
+    if (form) {
+      form.dispatchEvent(
+        new Event('submit', { cancelable: true, bubbles: true }),
+      );
     }
-  }, [
-    attachments,
-    handleSubmit,
-    setAttachments,
-    setLocalStorageInput,
-    width,
-    chatId,
-  ]);
-
-  const uploadFile = async (file: File) => {
-    const formData = new FormData();
-    formData.append('file', file);
-
-    try {
-      const response = await fetch('/api/files/upload', {
-        method: 'POST',
-        body: formData,
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        const { url, pathname, contentType } = data;
-
-        return {
-          url,
-          name: pathname,
-          contentType: contentType,
-        };
-      }
-      const { error } = await response.json();
-      toast.error(error);
-    } catch (error) {
-      toast.error('文件上传失败，请重试！');
-    }
-  };
+  }, [isLoading]);
 
   const handleFileChange = useCallback(
-    async (event: ChangeEvent<HTMLInputElement>) => {
-      const files = Array.from(event.target.files || []);
+    async (e: ChangeEvent<HTMLInputElement>) => {
+      if (!e.target.files || e.target.files.length === 0) return;
 
-      setUploadQueue(files.map((file) => file.name));
+      const files = Array.from(e.target.files);
+      const uploadIds = files.map(() => Math.random().toString());
+      setUploadQueue(uploadIds);
+      setIsUploading(true);
 
       try {
-        const uploadPromises = files.map((file) => uploadFile(file));
-        const uploadedAttachments = await Promise.all(uploadPromises);
-        const successfullyUploadedAttachments = uploadedAttachments.filter(
-          (attachment) => attachment !== undefined,
-        );
+        const newAttachments: Attachment[] = [];
 
-        setAttachments((currentAttachments) => [
-          ...currentAttachments,
-          ...successfullyUploadedAttachments,
-        ]);
+        for (let i = 0; i < files.length; i++) {
+          const file = files[i];
+          const formData = new FormData();
+          formData.append('file', file);
+
+          // 只有登录用户才能上传文件到服务器
+          if (isLoggedIn) {
+            try {
+              const response = await fetch('/api/files', {
+                method: 'POST',
+                body: formData,
+              });
+
+              if (!response.ok) {
+                throw new Error('上传失败');
+              }
+
+              const { url, type } = await response.json();
+
+              newAttachments.push({
+                name: file.name,
+                type: type,
+                url: url,
+              });
+            } catch (error) {
+              console.error('上传文件失败:', error);
+              toast.error(`上传 ${file.name} 失败`);
+            }
+          } else {
+            // 未登录用户使用本地 URL
+            const url = URL.createObjectURL(file);
+            const type = file.type.startsWith('image/') ? 'image' : 'file';
+            
+            newAttachments.push({
+              name: file.name,
+              type: type,
+              url: url,
+            });
+            
+            toast.warning('您未登录，附件仅在本次会话有效');
+          }
+
+          // 移除当前文件的上传ID
+          setUploadQueue((prev) => {
+            const newQueue = [...prev];
+            newQueue.splice(newQueue.indexOf(uploadIds[i]), 1);
+            return newQueue;
+          });
+        }
+
+        setAttachments((prev) => [...prev, ...newAttachments]);
       } catch (error) {
-        console.error('Error uploading files!', error);
-      } finally {
+        console.error('处理文件失败:', error);
+        toast.error('处理文件失败');
         setUploadQueue([]);
+      } finally {
+        setIsUploading(false);
+        if (fileInputRef.current) {
+          fileInputRef.current.value = '';
+        }
       }
+    },
+    [setAttachments, isLoggedIn],
+  );
+
+  const removeAttachment = useCallback(
+    (index: number) => {
+      setAttachments((prev) => {
+        const newAttachments = [...prev];
+        newAttachments.splice(index, 1);
+        return newAttachments;
+      });
     },
     [setAttachments],
   );
 
+  useEffect(() => {
+    if (textAreaRef.current) {
+      textAreaRef.current.style.height = 'auto';
+      textAreaRef.current.style.height = `${textAreaRef.current.scrollHeight}px`;
+    }
+  }, [input]);
+
   return (
-    <div className="relative w-full flex flex-col gap-4">
-      {messages.length === 0 &&
-        attachments.length === 0 &&
-        uploadQueue.length === 0 && (
-          <SuggestedActions append={append} chatId={chatId} />
-        )}
-
-      <input
-        type="file"
-        className="fixed -top-4 -left-4 size-0.5 opacity-0 pointer-events-none"
-        ref={fileInputRef}
-        multiple
-        onChange={handleFileChange}
-        tabIndex={-1}
-      />
-
-      {(attachments.length > 0 || uploadQueue.length > 0) && (
-        <div className="flex flex-row gap-2 overflow-x-scroll items-end">
-          {attachments.map((attachment) => (
-            <PreviewAttachment key={attachment.url} attachment={attachment} />
-          ))}
-
-          {uploadQueue.map((filename) => (
+    <div className={cx('relative', className)}>
+      {attachments.length > 0 && (
+        <div className="flex flex-wrap gap-2 mb-2">
+          {attachments.map((attachment, index) => (
             <PreviewAttachment
-              key={filename}
-              attachment={{
-                url: '',
-                name: filename,
-                contentType: '',
-              }}
-              isUploading={true}
+              key={index}
+              attachment={attachment}
+              onRemove={() => removeAttachment(index)}
             />
           ))}
         </div>
       )}
 
-      <Textarea
-        ref={textareaRef}
-        placeholder="发送消息..."
-        value={input}
-        onChange={handleInput}
-        className={cx(
-          'min-h-[24px] max-h-[calc(75dvh)] overflow-hidden resize-none rounded-2xl !text-base bg-white dark:bg-zinc-800/80 border border-blue-100 dark:border-zinc-700 shadow-sm focus:border-blue-300 dark:focus:border-blue-700 focus:ring-1 focus:ring-blue-300 dark:focus:ring-blue-700 pb-10',
-          className,
-        )}
-        rows={2}
-        autoFocus
-        onKeyDown={(event) => {
-          if (event.key === 'Enter' && !event.shiftKey) {
-            event.preventDefault();
+      {messages.length === 0 && (
+        <SuggestedActions
+          messages={messages}
+          setInput={setInput}
+          isLoggedIn={isLoggedIn}
+        />
+      )}
 
-            if (isLoading) {
-              toast.error('请等待模型完成响应！');
-            } else {
-              submitForm();
-            }
-          }
-        }}
-      />
-
-      <div className="absolute bottom-0 p-2 w-fit flex flex-row justify-start items-center gap-2">
-        <AttachmentsButton fileInputRef={fileInputRef} isLoading={isLoading} />
-        {selectedModelId && (
-          <div className="ml-1">
-            <ModelSelector
-              selectedModelId={selectedModelId}
-              className="text-xs h-7 px-2 py-1"
+      <div className="flex items-end gap-2">
+        <div className="relative flex-1">
+          <Textarea
+            ref={textAreaRef}
+            tabIndex={0}
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder="发送消息..."
+            spellCheck={false}
+            className="pr-12 resize-none bg-background leading-tight h-[44px] max-h-[200px] overflow-y-auto"
+            rows={1}
+          />
+          <div className="absolute right-2 bottom-1 flex items-center">
+            <AttachmentsButton
+              fileInputRef={fileInputRef}
+              isLoading={isLoading || isUploading}
             />
+            <input
+              ref={fileInputRef}
+              type="file"
+              multiple
+              className="hidden"
+              onChange={handleFileChange}
+              accept="image/*,.pdf"
+            />
+            {isLoading ? (
+              <StopButton stop={stop} />
+            ) : (
+              <SendButton
+                submitForm={submitForm}
+                input={input}
+                uploadQueue={uploadQueue}
+              />
+            )}
           </div>
-        )}
-      </div>
-
-      <div className="absolute bottom-0 right-0 p-2 w-fit flex flex-row justify-end">
-        {isLoading ? (
-          <StopButton stop={stop} setMessages={setMessages} />
-        ) : (
-          <SendButton
-            input={input}
-            submitForm={submitForm}
-            uploadQueue={uploadQueue}
+        </div>
+        {!isMobile && (
+          <ModelSelector
+            selectedModelId={selectedModelId}
+            setSelectedModelId={setSelectedModelId}
+            isLoggedIn={isLoggedIn}
           />
         )}
       </div>
@@ -292,8 +260,7 @@ export const MultimodalInput = memo(
     if (prevProps.input !== nextProps.input) return false;
     if (prevProps.isLoading !== nextProps.isLoading) return false;
     if (!equal(prevProps.attachments, nextProps.attachments)) return false;
-    if (prevProps.selectedModelId !== nextProps.selectedModelId) return false;
-
+    if (!equal(prevProps.messages, nextProps.messages)) return false;
     return true;
   },
 );
@@ -307,15 +274,14 @@ function PureAttachmentsButton({
 }) {
   return (
     <Button
-      className="rounded-full p-1.5 h-fit bg-gray-100 hover:bg-gray-200 dark:bg-zinc-700 dark:hover:bg-zinc-600 border border-gray-200 dark:border-zinc-600 text-gray-600 dark:text-gray-300"
-      onClick={(event) => {
-        event.preventDefault();
-        fileInputRef.current?.click();
-      }}
-      disabled={isLoading}
       variant="ghost"
+      size="icon"
+      type="button"
+      disabled={isLoading}
+      onClick={() => fileInputRef.current?.click()}
+      className="h-8 w-8 mr-1"
     >
-      <PaperclipIcon size={14} />
+      <PaperclipIcon className="h-5 w-5" />
     </Button>
   );
 }
@@ -324,21 +290,20 @@ const AttachmentsButton = memo(PureAttachmentsButton);
 
 function PureStopButton({
   stop,
-  setMessages,
 }: {
   stop: () => void;
-  setMessages: Dispatch<SetStateAction<Array<Message>>>;
 }) {
   return (
     <Button
-      className="rounded-full p-1.5 h-fit bg-red-500 hover:bg-red-600 text-white border-none shadow-sm"
-      onClick={(event) => {
-        event.preventDefault();
+      variant="ghost"
+      size="icon"
+      type="button"
+      onClick={() => {
         stop();
-        setMessages((messages) => sanitizeUIMessages(messages));
       }}
+      className="h-8 w-8"
     >
-      <StopIcon size={14} />
+      <StopIcon className="h-5 w-5" />
     </Button>
   );
 }
@@ -356,14 +321,13 @@ function PureSendButton({
 }) {
   return (
     <Button
-      className="rounded-full p-1.5 h-fit bg-blue-500 hover:bg-blue-600 text-white border-none shadow-sm"
-      onClick={(event) => {
-        event.preventDefault();
-        submitForm();
-      }}
-      disabled={input.length === 0 || uploadQueue.length > 0}
+      variant="ghost"
+      size="icon"
+      disabled={input.trim().length === 0 || uploadQueue.length > 0}
+      onClick={submitForm}
+      className="h-8 w-8"
     >
-      <ArrowUpIcon size={14} />
+      <ArrowUpIcon className="h-5 w-5" />
     </Button>
   );
 }
