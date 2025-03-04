@@ -203,8 +203,10 @@ function n(num: number): number {
 
 export function Weather({
   weatherAtLocation = SAMPLE,
+  className, // Added className prop
 }: {
   weatherAtLocation?: WeatherAtLocation;
+  className: string; // Added className prop type
 }) {
   const currentHigh = Math.max(
     ...weatherAtLocation.hourly.temperature_2m.slice(0, 24),
@@ -249,17 +251,18 @@ export function Weather({
   );
 
   return (
-    <div
-      className={cx(
-        'flex flex-col gap-4 rounded-2xl p-4 skeleton-bg max-w-[500px]',
-        {
-          'bg-blue-400': isDay,
-        },
-        {
-          'bg-indigo-900': !isDay,
-        },
-      )}
-    >
+  <div
+    className={cx(
+      'flex flex-col gap-4 rounded-2xl p-4 skeleton-bg max-w-[500px]',
+      {
+        'bg-blue-400': isDay,
+      },
+      {
+        'bg-indigo-900': !isDay,
+      },
+      className, // Use the className prop
+    )}
+  >
       <div className="flex flex-row justify-between items-center">
         <div className="flex flex-row gap-2 items-center">
           <div

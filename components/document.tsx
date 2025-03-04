@@ -1,4 +1,5 @@
 import { memo } from 'react';
+import cn from 'classnames'; // Import the cn function
 
 import type { ArtifactKind } from './artifact';
 import { FileIcon, LoaderIcon, MessageIcon, PencilEditIcon } from './icons';
@@ -27,19 +28,21 @@ interface DocumentToolResultProps {
   type: 'create' | 'update' | 'request-suggestions';
   result: { id: string; title: string; kind: ArtifactKind };
   isReadonly: boolean;
+  className: string; // Added className prop type
 }
 
 function PureDocumentToolResult({
   type,
   result,
   isReadonly,
+  className, // Added className prop
 }: DocumentToolResultProps) {
   const { setArtifact } = useArtifact();
 
   return (
     <button
       type="button"
-      className="bg-background cursor-pointer border py-2 px-3 rounded-xl w-fit flex flex-row gap-3 items-start"
+      className={cn("bg-background cursor-pointer border py-2 px-3 rounded-xl w-fit flex flex-row gap-3 items-start", className)} // Use the className prop
       onClick={(event) => {
         if (isReadonly) {
           toast.error(
@@ -90,19 +93,21 @@ interface DocumentToolCallProps {
   type: 'create' | 'update' | 'request-suggestions';
   args: { title: string };
   isReadonly: boolean;
+  className: string; // Added className prop type
 }
 
 function PureDocumentToolCall({
   type,
   args,
   isReadonly,
+  className, // Added className prop
 }: DocumentToolCallProps) {
   const { setArtifact } = useArtifact();
 
   return (
     <button
       type="button"
-      className="cursor pointer w-fit border py-2 px-3 rounded-xl flex flex-row items-start justify-between gap-3"
+      className={cn("cursor pointer w-fit border py-2 px-3 rounded-xl flex flex-row items-start justify-between gap-3", className)} // Use the className prop
       onClick={(event) => {
         if (isReadonly) {
           toast.error(

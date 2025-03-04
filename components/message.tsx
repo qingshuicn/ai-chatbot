@@ -34,6 +34,7 @@ const PurePreviewMessage = ({
   setMessages,
   reload,
   isReadonly,
+  className = '', // Added default empty string
 }: {
   chatId: string;
   message: Message;
@@ -46,6 +47,7 @@ const PurePreviewMessage = ({
     chatRequestOptions?: ChatRequestOptions,
   ) => Promise<string | null | undefined>;
   isReadonly: boolean;
+  className?: string;
 }) => {
   const [mode, setMode] = useState<'view' | 'edit'>('view');
 
@@ -147,28 +149,31 @@ const PurePreviewMessage = ({
 
                     return (
                       <div key={toolCallId}>
-                        {toolName === 'getWeather' ? (
-                          <Weather weatherAtLocation={result} />
-                        ) : toolName === 'createDocument' ? (
-                          <DocumentPreview
-                            isReadonly={isReadonly}
-                            result={result}
-                          />
-                        ) : toolName === 'updateDocument' ? (
-                          <DocumentToolResult
-                            type="update"
-                            result={result}
-                            isReadonly={isReadonly}
-                          />
-                        ) : toolName === 'requestSuggestions' ? (
-                          <DocumentToolResult
-                            type="request-suggestions"
-                            result={result}
-                            isReadonly={isReadonly}
-                          />
-                        ) : (
-                          <pre>{JSON.stringify(result, null, 2)}</pre>
-                        )}
+{toolName === 'getWeather' ? (
+  <Weather weatherAtLocation={result} className={className} />
+) : toolName === 'createDocument' ? (
+  <DocumentPreview
+    isReadonly={isReadonly}
+    result={result}
+    className={className}
+  />
+) : toolName === 'updateDocument' ? (
+  <DocumentToolResult
+    type="update"
+    result={result}
+    isReadonly={isReadonly}
+    className={className}
+  />
+) : toolName === 'requestSuggestions' ? (
+  <DocumentToolResult
+    type="request-suggestions"
+    result={result}
+    isReadonly={isReadonly}
+    className={className}
+  />
+) : (
+  <pre>{JSON.stringify(result, null, 2)}</pre>
+)}
                       </div>
                     );
                   }
@@ -179,23 +184,25 @@ const PurePreviewMessage = ({
                         skeleton: ['getWeather'].includes(toolName),
                       })}
                     >
-                      {toolName === 'getWeather' ? (
-                        <Weather />
-                      ) : toolName === 'createDocument' ? (
-                        <DocumentPreview isReadonly={isReadonly} args={args} />
-                      ) : toolName === 'updateDocument' ? (
-                        <DocumentToolCall
-                          type="update"
-                          args={args}
-                          isReadonly={isReadonly}
-                        />
-                      ) : toolName === 'requestSuggestions' ? (
-                        <DocumentToolCall
-                          type="request-suggestions"
-                          args={args}
-                          isReadonly={isReadonly}
-                        />
-                      ) : null}
+{toolName === 'getWeather' ? (
+  <Weather className={className} />
+) : toolName === 'createDocument' ? (
+  <DocumentPreview isReadonly={isReadonly} args={args} className={className} />
+) : toolName === 'updateDocument' ? (
+  <DocumentToolCall
+    type="update"
+    args={args}
+    isReadonly={isReadonly}
+    className={className}
+  />
+) : toolName === 'requestSuggestions' ? (
+  <DocumentToolCall
+    type="request-suggestions"
+    args={args}
+    isReadonly={isReadonly}
+    className={className}
+  />
+) : null}
                     </div>
                   );
                 })}

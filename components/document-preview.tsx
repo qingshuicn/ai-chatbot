@@ -26,12 +26,14 @@ interface DocumentPreviewProps {
   isReadonly: boolean;
   result?: any;
   args?: any;
+  className: string; // Added className prop type
 }
 
 export function DocumentPreview({
   isReadonly,
   result,
   args,
+  className, // Added className prop
 }: DocumentPreviewProps) {
   const { artifact, setArtifact } = useArtifact();
 
@@ -58,27 +60,29 @@ export function DocumentPreview({
     }
   }, [artifact.documentId, setArtifact]);
 
-  if (artifact.isVisible) {
-    if (result) {
-      return (
-        <DocumentToolResult
-          type="create"
-          result={{ id: result.id, title: result.title, kind: result.kind }}
-          isReadonly={isReadonly}
-        />
-      );
-    }
-
-    if (args) {
-      return (
-        <DocumentToolCall
-          type="create"
-          args={{ title: args.title }}
-          isReadonly={isReadonly}
-        />
-      );
-    }
+if (artifact.isVisible) {
+  if (result) {
+    return (
+      <DocumentToolResult
+        type="create"
+        result={{ id: result.id, title: result.title, kind: result.kind }}
+        isReadonly={isReadonly}
+        className={className} // Pass the className prop
+      />
+    );
   }
+
+  if (args) {
+    return (
+      <DocumentToolCall
+        type="create"
+        args={{ title: args.title }}
+        isReadonly={isReadonly}
+        className={className} // Pass the className prop
+      />
+    );
+  }
+}
 
   if (isDocumentsFetching) {
     return <LoadingSkeleton artifactKind={result.kind ?? args.kind} />;
@@ -100,7 +104,7 @@ export function DocumentPreview({
   if (!document) return <LoadingSkeleton artifactKind={artifact.kind} />;
 
   return (
-    <div className="relative w-full cursor-pointer">
+    <div className={cn("relative w-full cursor-pointer", className)}> // Use the className prop
       <HitboxLayer
         hitboxRef={hitboxRef}
         result={result}
