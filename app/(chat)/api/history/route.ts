@@ -5,7 +5,8 @@ export async function GET() {
   const session = await auth();
 
   if (!session || !session.user) {
-    return Response.json('未授权！', { status: 401 });
+    // 未登录用户返回空数组
+    return Response.json([], { status: 200 });
   }
 
   // biome-ignore lint: Forbidden non-null assertion.

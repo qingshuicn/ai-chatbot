@@ -70,6 +70,7 @@ function PureArtifact({
   reload,
   votes,
   isReadonly,
+  isLoggedIn = true,
 }: {
   chatId: string;
   input: string;
@@ -95,6 +96,7 @@ function PureArtifact({
     chatRequestOptions?: ChatRequestOptions,
   ) => Promise<string | null | undefined>;
   isReadonly: boolean;
+  isLoggedIn?: boolean;
 }) {
   const { artifact, setArtifact, metadata, setMetadata } = useArtifact();
 
@@ -103,7 +105,7 @@ function PureArtifact({
     isLoading: isDocumentsFetching,
     mutate: mutateDocuments,
   } = useSWR<Array<Document>>(
-    artifact.documentId !== 'init' && artifact.status !== 'streaming'
+    isLoggedIn && artifact.documentId !== 'init' && artifact.status !== 'streaming'
       ? `/api/document?id=${artifact.documentId}`
       : null,
     fetcher,
@@ -139,7 +141,7 @@ function PureArtifact({
 
   const handleContentChange = useCallback(
     (updatedContent: string) => {
-      if (!artifact) return;
+      if (!artifact || !isLoggedIn) return;
 
       mutate<Array<Document>>(
         `/api/document?id=${artifact.documentId}`,
@@ -178,7 +180,7 @@ function PureArtifact({
         { revalidate: false },
       );
     },
-    [artifact, mutate],
+    [artifact, mutate, isLoggedIn],
   );
 
   const debouncedHandleContentChange = useDebounceCallback(
@@ -335,21 +337,21 @@ function PureArtifact({
                 />
 
                 <form className="flex flex-row gap-2 relative items-end w-full px-4 pb-4">
-<MultimodalInput
-  chatId={chatId}
-  input={input}
-  setInput={setInput}
-  handleSubmit={handleSubmit}
-  isLoading={isLoading}
-  stop={stop}
-  attachments={attachments}
-  setAttachments={setAttachments}
-  messages={messages}
-  append={append}
-  className="bg-background dark:bg-muted"
-  setMessages={setMessages}
-  selectedModelId="placeholder-model-id"
-/>
+                  <MultimodalInput
+                    chatId={chatId}
+                    input={input}
+                    setInput={setInput}
+                    handleSubmit={handleSubmit}
+                    isLoading={isLoading}
+                    stop={stop}
+                    attachments={attachments}
+                    setAttachments={setAttachments}
+                    messages={messages}
+                    append={append}
+                    className="bg-background dark:bg-muted"
+                    setMessages={setMessages}
+                    selectedModelId="placeholder-model-id"
+                  />
                 </form>
               </div>
             </motion.div>
@@ -517,6 +519,7 @@ export const Artifact = memo(PureArtifact, (prevProps, nextProps) => {
   if (!equal(prevProps.votes, nextProps.votes)) return false;
   if (prevProps.input !== nextProps.input) return false;
   if (!equal(prevProps.messages, nextProps.messages.length)) return false;
+  if (prevProps.isLoggedIn !== nextProps.isLoggedIn) return false;
 
   return true;
 });

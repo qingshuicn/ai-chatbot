@@ -17,7 +17,8 @@ export async function GET(request: Request) {
   const session = await auth();
 
   if (!session || !session.user) {
-    return new Response('未授权', { status: 401 });
+    // 未登录用户返回空数组
+    return Response.json([], { status: 200 });
   }
 
   const documents = await getDocumentsById({ id });
@@ -46,7 +47,8 @@ export async function POST(request: Request) {
   const session = await auth();
 
   if (!session) {
-    return new Response('未授权', { status: 401 });
+    // 未登录用户返回空对象
+    return Response.json({}, { status: 200 });
   }
 
   const {
@@ -67,7 +69,8 @@ export async function POST(request: Request) {
 
     return Response.json(document, { status: 200 });
   }
-  return new Response('未授权', { status: 401 });
+  // 未登录用户返回空对象
+  return Response.json({}, { status: 200 });
 }
 
 export async function PATCH(request: Request) {
@@ -83,7 +86,8 @@ export async function PATCH(request: Request) {
   const session = await auth();
 
   if (!session || !session.user) {
-    return new Response('未授权', { status: 401 });
+    // 未登录用户返回成功但不执行任何操作
+    return new Response('未登录用户无法删除文档', { status: 200 });
   }
 
   const documents = await getDocumentsById({ id });

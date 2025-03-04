@@ -37,10 +37,7 @@ export async function POST(request: Request) {
     await request.json();
 
   const session = await auth();
-
-  if (!session || !session.user || !session.user.id) {
-    return new Response('未授权', { status: 401 });
-  }
+  const isLoggedIn = !!(session && session.user && session.user.id);
 
   const userMessage = getMostRecentUserMessage(messages);
 
@@ -48,16 +45,19 @@ export async function POST(request: Request) {
     return new Response('未找到用户消息', { status: 400 });
   }
 
-  const chat = await getChatById({ id });
+  // 只有登录用户才保存聊天记录到数据库
+  if (isLoggedIn) {
+    const chat = await getChatById({ id });
 
-  if (!chat) {
-    const title = await generateTitleFromUserMessage({ message: userMessage });
-    await saveChat({ id, userId: session.user.id, title });
+    if (!chat) {
+      const title = await generateTitleFromUserMessage({ message: userMessage });
+      await saveChat({ id, userId: session.user.id, title });
+    }
+
+    await saveMessages({
+      messages: [{ ...userMessage, createdAt: new Date(), chatId: id }],
+    });
   }
-
-  await saveMessages({
-    messages: [{ ...userMessage, createdAt: new Date(), chatId: id }],
-  });
 
   return createDataStreamResponse({
     execute: (dataStream) => {
@@ -87,7 +87,7 @@ export async function POST(request: Request) {
           }),
         },
         onFinish: async ({ response, reasoning }) => {
-          if (session.user?.id) {
+          if (isLoggedIn) {
             try {
               const sanitizedResponseMessages = sanitizeResponseMessages({
                 messages: response.messages,

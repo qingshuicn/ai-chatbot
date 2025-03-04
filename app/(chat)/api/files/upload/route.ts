@@ -18,11 +18,9 @@ const FileSchema = z.object({
 });
 
 export async function POST(request: Request) {
+  // 检查用户是否登录，但不要求必须登录
   const session = await auth();
-
-  if (!session) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
+  // 移除了未授权检查，允许未登录用户上传文件
 
   if (request.body === null) {
     return new Response('Request body is empty', { status: 400 });

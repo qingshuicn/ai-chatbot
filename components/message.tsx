@@ -34,6 +34,7 @@ const PurePreviewMessage = ({
   setMessages,
   reload,
   isReadonly,
+  isLoggedIn = true,
   className = '', // Added default empty string
 }: {
   chatId: string;
@@ -47,6 +48,7 @@ const PurePreviewMessage = ({
     chatRequestOptions?: ChatRequestOptions,
   ) => Promise<string | null | undefined>;
   isReadonly: boolean;
+  isLoggedIn?: boolean;
   className?: string;
 }) => {
   const [mode, setMode] = useState<'view' | 'edit'>('view');
@@ -209,7 +211,7 @@ const PurePreviewMessage = ({
               </div>
             )}
 
-            {!isReadonly && (
+            {!isReadonly && isLoggedIn && (
               <MessageActions
                 key={`action-${message.id}`}
                 chatId={chatId}
@@ -240,6 +242,7 @@ export const PreviewMessage = memo(
     )
       return false;
     if (!equal(prevProps.vote, nextProps.vote)) return false;
+    if (prevProps.isLoggedIn !== nextProps.isLoggedIn) return false;
 
     return true;
   },

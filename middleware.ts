@@ -5,11 +5,9 @@ import { authConfig } from '@/app/(auth)/auth.config';
 export default NextAuth(authConfig).auth;
 
 export const config = {
-  // 使用正则表达式排除测试端点
+  // 使用正则表达式排除测试端点和聊天页面
   matcher: [
-    '/', 
-    '/:id', 
-    '/api/((?!test-bailian|test-deepseek|test-deepseek-chat).*)',
+    '/api/((?!test-bailian|test-deepseek|test-deepseek-chat|chat).*))',
     '/login', 
     '/register'
   ],

@@ -45,6 +45,7 @@ function PureMultimodalInput({
   handleSubmit,
   className,
   selectedModelId,
+  isLoggedIn,
 }: {
   chatId: string;
   input: string;
@@ -67,6 +68,7 @@ function PureMultimodalInput({
   ) => void;
   className?: string;
   selectedModelId: string;
+  isLoggedIn?: boolean;
 }) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { width } = useWindowSize();

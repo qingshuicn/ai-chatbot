@@ -12,7 +12,8 @@ export async function GET(request: Request) {
   const session = await auth();
 
   if (!session || !session.user) {
-    return new Response('未授权', { status: 401 });
+    // 未登录用户返回空数组
+    return Response.json([], { status: 200 });
   }
 
   const suggestions = await getSuggestionsByDocumentId({

@@ -19,6 +19,7 @@ interface ArtifactMessagesProps {
   ) => Promise<string | null | undefined>;
   isReadonly: boolean;
   artifactStatus: UIArtifact['status'];
+  isLoggedIn?: boolean;
 }
 
 function PureArtifactMessages({
@@ -29,6 +30,7 @@ function PureArtifactMessages({
   setMessages,
   reload,
   isReadonly,
+  isLoggedIn = true,
 }: ArtifactMessagesProps) {
   const [messagesContainerRef, messagesEndRef] =
     useScrollToBottom<HTMLDivElement>();
@@ -52,6 +54,7 @@ function PureArtifactMessages({
           setMessages={setMessages}
           reload={reload}
           isReadonly={isReadonly}
+          isLoggedIn={isLoggedIn}
         />
       ))}
 
@@ -77,6 +80,7 @@ function areEqual(
   if (prevProps.isLoading && nextProps.isLoading) return false;
   if (prevProps.messages.length !== nextProps.messages.length) return false;
   if (!equal(prevProps.votes, nextProps.votes)) return false;
+  if (prevProps.isLoggedIn !== nextProps.isLoggedIn) return false;
 
   return true;
 }

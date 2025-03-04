@@ -12,7 +12,8 @@ export async function GET(request: Request) {
   const session = await auth();
 
   if (!session || !session.user || !session.user.email) {
-    return new Response('未授权', { status: 401 });
+    // 未登录用户返回空数组而不是401错误
+    return Response.json([], { status: 200 });
   }
 
   const votes = await getVotesByChatId({ id: chatId });
@@ -35,7 +36,8 @@ export async function PATCH(request: Request) {
   const session = await auth();
 
   if (!session || !session.user || !session.user.email) {
-    return new Response('未授权', { status: 401 });
+    // 未登录用户返回成功但不执行任何操作
+    return new Response('未登录用户无法投票', { status: 200 });
   }
 
   await voteMessage({
