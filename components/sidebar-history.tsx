@@ -271,25 +271,6 @@ export function SidebarHistory({ user }: { user: User | undefined }) {
         <SidebarGroup>
           <SidebarGroupContent>
             <div className="px-2 py-4 flex flex-col gap-4">
-              <Button
-                variant="default"
-                size="sm"
-                className="w-full flex items-center gap-2"
-                onClick={() => {
-                  // 创建新的本地聊天记录
-                  const newChatId = createLocalChat(generateDefaultTitle(), 'gpt-3.5-turbo');
-                  
-                  // 清除当前会话的消息
-                  localStorage.removeItem(`${CHAT_MESSAGES_KEY_PREFIX}${newChatId}`);
-                  
-                  // 导航到根页面，添加时间戳参数以触发页面重新渲染
-                  router.push(`/chat/${newChatId}`);
-                  setOpenMobile(false);
-                }}
-              >
-                <PlusIcon />
-                <span>新建聊天</span>
-              </Button>
               <div className="text-zinc-500 w-full flex flex-row justify-center items-center text-sm gap-2">
                 登录以保存和重访之前的聊天！
               </div>
@@ -466,19 +447,6 @@ export function SidebarHistory({ user }: { user: User | undefined }) {
         <SidebarGroup>
           <SidebarGroupContent>
             <div className="px-2 py-4 flex flex-col gap-4">
-              <Button
-                variant="default"
-                size="sm"
-                className="w-full flex items-center gap-2"
-                onClick={() => {
-                  router.replace(`/?t=${Date.now()}`);
-                  router.refresh();
-                  setOpenMobile(false);
-                }}
-              >
-                <PlusIcon />
-                <span>新建聊天</span>
-              </Button>
               <div className="text-zinc-500 w-full flex flex-row justify-center items-center text-sm gap-2">
                 开始聊天后，您的对话将显示在这里！
               </div>
@@ -494,19 +462,6 @@ export function SidebarHistory({ user }: { user: User | undefined }) {
       <SidebarGroup>
         <SidebarGroupContent>
           <div className="px-2 py-2">
-            <Button
-              variant="default"
-              size="sm"
-              className="w-full flex items-center gap-2"
-              onClick={() => {
-                router.replace(`/?t=${Date.now()}`);
-                router.refresh();
-                setOpenMobile(false);
-              }}
-            >
-              <PlusIcon />
-              <span>新建聊天</span>
-            </Button>
           </div>
         </SidebarGroupContent>
       </SidebarGroup>
