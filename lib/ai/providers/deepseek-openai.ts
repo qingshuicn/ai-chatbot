@@ -5,7 +5,10 @@ import {
   LanguageModelV1StreamPart,
   Message
 } from 'ai';
-import { LanguageModelV1FinishReason } from '@ai-sdk/provider';
+
+// 在文档中添加 LanguageModelV1FinishReason 类型
+// 这个类型来自 @ai-sdk/provider 包的一部分
+type LanguageModelV1FinishReason = 'stop' | 'length' | 'content-filter' | 'tool-calls';
 
 /**
  * 创建DeepSeek模型提供商（使用OpenAI兼容API）
