@@ -82,7 +82,7 @@ export function updateLocalChat(id: string, updates: Partial<LocalChatHistory>):
       title: updates.title || generateDefaultTitle(),
       createdAt: now,
       updatedAt: now,
-      modelId: updates.modelId || 'gpt-3.5-turbo',
+      modelId: updates.modelId || 'deepseek-v3',
       ...updates
     };
     

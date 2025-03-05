@@ -64,6 +64,9 @@ export default function Page() {
       
       if (modelCookie) {
         setSelectedModel(modelCookie.split('=')[1]);
+      } else {
+        // 如果没有cookie，使用默认模型
+        setSelectedModel(DEFAULT_CHAT_MODEL);
       }
     };
     
@@ -90,7 +93,7 @@ export default function Page() {
             // 创建新的聊天记录，使用当前ID
             updateLocalChat(id, {
               title: generateDefaultTitle(),
-              modelId: selectedModel
+              modelId: DEFAULT_CHAT_MODEL
             });
           }
         }}

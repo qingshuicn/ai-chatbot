@@ -1,16 +1,18 @@
 'use client';
 
-import type {
+import {
   Attachment,
   Message,
 } from 'ai';
+import { useChat, useCompletion } from 'ai/react';
 import cx from 'classnames';
 import type React from 'react';
 import {
-  useRef,
-  useEffect,
-  useState,
   useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
   type Dispatch,
   type SetStateAction,
   type ChangeEvent,
@@ -18,16 +20,14 @@ import {
 } from 'react';
 import { toast } from 'sonner';
 import { useLocalStorage, useWindowSize } from 'usehooks-ts';
-
-import { sanitizeUIMessages } from '@/lib/utils';
-
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
 import { ArrowUpIcon, PaperclipIcon, StopIcon } from './icons';
 import { ModelSelector } from './model-selector';
 import { PreviewAttachment } from './preview-attachment';
-import { Button } from './ui/button';
-import { Textarea } from './ui/textarea';
 import { SuggestedActions } from './suggested-actions';
 import equal from 'fast-deep-equal';
+import { DEFAULT_CHAT_MODEL } from '@/lib/ai/models';
 
 function PureMultimodalInput({
   input,
@@ -58,8 +58,15 @@ function PureMultimodalInput({
   const [isUploading, setIsUploading] = useState(false);
   const [selectedModelId, setSelectedModelId] = useLocalStorage(
     'chat-model',
-    'chat-model-default',
+    'deepseek-v3',
   );
+  
+  // 添加模型选择器更新函数
+  const handleModelChange = useCallback((modelId: string) => {
+    setSelectedModelId(modelId);
+    // 如果需要进一步处理，可以在这里添加
+  }, [setSelectedModelId]);
+  
   const windowSize = useWindowSize();
   const isMobile = windowSize.width < 640;
 
@@ -216,14 +223,16 @@ function PureMultimodalInput({
             onKeyDown={handleKeyDown}
             placeholder="发送消息..."
             spellCheck={false}
-            className="pr-12 resize-none bg-background leading-tight h-[44px] max-h-[200px] overflow-y-auto"
+            className="pr-24 resize-none bg-background leading-tight h-[44px] max-h-[200px] overflow-y-auto"
             rows={1}
           />
-          <div className="absolute right-2 bottom-1 flex items-center">
-            <AttachmentsButton
-              fileInputRef={fileInputRef}
-              isLoading={isLoading || isUploading}
+          <div className="absolute right-2 bottom-1 flex items-center z-10">
+            <ModelSelector
+              selectedModelId={selectedModelId}
+              className="mr-1"
+              onChange={handleModelChange}
             />
+            {/* 移除附件按钮 */}
             <input
               ref={fileInputRef}
               type="file"
@@ -243,12 +252,6 @@ function PureMultimodalInput({
             )}
           </div>
         </div>
-        {!isMobile && (
-          <ModelSelector
-            selectedModelId={selectedModelId}
-            className=""
-          />
-        )}
       </div>
     </div>
   );
@@ -264,29 +267,6 @@ export const MultimodalInput = memo(
     return true;
   },
 );
-
-function PureAttachmentsButton({
-  fileInputRef,
-  isLoading,
-}: {
-  fileInputRef: React.MutableRefObject<HTMLInputElement | null>;
-  isLoading: boolean;
-}) {
-  return (
-    <Button
-      variant="ghost"
-      size="icon"
-      type="button"
-      disabled={isLoading}
-      onClick={() => fileInputRef.current?.click()}
-      className="h-8 w-8 mr-1"
-    >
-      <PaperclipIcon size={20} />
-    </Button>
-  );
-}
-
-const AttachmentsButton = memo(PureAttachmentsButton);
 
 function PureStopButton({
   stop,
@@ -321,13 +301,13 @@ function PureSendButton({
 }) {
   return (
     <Button
-      variant="ghost"
-      size="icon"
+      variant="outline"
+      size="sm"
       disabled={input.trim().length === 0 || uploadQueue.length > 0}
       onClick={submitForm}
-      className="h-8 w-8"
+      className="h-8 px-3"
     >
-      <ArrowUpIcon size={20} />
+      发送
     </Button>
   );
 }

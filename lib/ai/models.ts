@@ -2,7 +2,7 @@ import { customProvider } from 'ai';
 import { bailian } from './providers/bailian';
 import { deepseekOpenAI } from './providers/deepseek-openai';
 
-export const DEFAULT_CHAT_MODEL: string = 'bailian-qwen';
+export const DEFAULT_CHAT_MODEL: string = 'deepseek-v3';
 
 export const myProvider = customProvider({
   languageModels: {
